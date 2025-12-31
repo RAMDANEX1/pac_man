@@ -6,10 +6,12 @@ class Menu {
   int _animationFrame;           // Frame d'animation
   
   // Options du menu
-  String[] _menuOptions = {"JOUER", "INSTRUCTIONS", "QUITTER"};
+  String[] _menuOptions = {"JOUER", "INSTRUCTIONS", "SCORES", "QUITTER"};
   
   // État des instructions
   boolean _showingInstructions;
+  boolean _showingScores;
+  HighScores _highScores;
   
   // État de sélection de difficulté
   boolean _selectingDifficulty;
@@ -23,8 +25,10 @@ class Menu {
     _pacmanX = -50;
     _animationFrame = 0;
     _showingInstructions = false;
+    _showingScores = false;
     _selectingDifficulty = false;
     _selectedDifficulty = 1; // MEDIUM par défaut
+    _highScores = new HighScores();
   }
   
   // Mise à jour du menu
@@ -47,6 +51,8 @@ class Menu {
     
     if (_showingInstructions) {
       drawInstructions();
+    } else if (_showingScores) {
+      _highScores.display();
     } else if (_selectingDifficulty) {
       drawDifficultySelection();
     } else {
@@ -314,6 +320,12 @@ class Menu {
         _showingInstructions = false;
         key = 0; // Empêcher la fermeture de l'application
       }
+    } else if (_showingScores) {
+      // Dans les scores, ESC pour retourner
+      if (k == ESC) {
+        _showingScores = false;
+        key = 0;
+      }
     } else if (_selectingDifficulty) {
       // Navigation dans la sélection de difficulté
       if (k == CODED) {
@@ -364,7 +376,10 @@ class Menu {
       case 1: // INSTRUCTIONS
         _showingInstructions = true;
         break;
-      case 2: // QUITTER
+      case 2: // SCORES
+        _showingScores = true;
+        break;
+      case 3: // QUITTER
         exit();
         break;
     }
@@ -374,6 +389,7 @@ class Menu {
   void reset() {
     _selectedOption = 0;
     _showingInstructions = false;
+    _showingScores = false;
     _selectingDifficulty = false;
     _pacmanX = -50;
   }

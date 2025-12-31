@@ -124,6 +124,11 @@ class Game
     
     if (_gameOver) {
       _gameOverTimer++;
+      // Vérifier une seule fois si c'est un high score
+      if (_gameOverTimer == 60 && _highScores.isHighScore(_score) && !_enteringName) {
+        _enteringName = true;
+        _playerName = "";
+      }
       return;
     }
     
@@ -162,8 +167,15 @@ class Game
       
       // Vérifier si Pac-Man touche le bonus
       if (_bonus.collidesWith(_hero)) {
+        String bonusType = _bonus.getType();
         int bonusScore = _bonus.collect();
-        if (bonusScore > 0) {
+        
+        // Si c'est une cerise, donner une vie bonus
+        if (bonusType.equals("cherry") && bonusScore > 0) {
+          _lives++;
+          _cherriesCollected++;
+          println("Cerise collectée ! +1 vie");
+        } else if (bonusScore > 0) {
           _score += bonusScore;
           println("Bonus collecté ! +" + bonusScore + " points");
         }
@@ -180,6 +192,8 @@ class Game
     // Vérifier si le niveau est terminé
     if (_dotsEaten >= _totalDots) {
       _levelComplete = true;
+      _gameOver = true;  // Traiter comme game over pour demander le nom
+      _gameOverTimer = 0;
     }
   }
   
@@ -324,12 +338,46 @@ class Game
     textSize(20);
     text("SCORE: " + _score, BOARD_OFFSET_X, BOARD_OFFSET_Y - 30);
     
-    // Afficher les vies
-    text("VIES: " + _lives, BOARD_OFFSET_X + 250, BOARD_OFFSET_Y - 30);
-    
     // Afficher les gommes restantes
     int dotsLeft = _totalDots - _dotsEaten;
     text("GOMMES: " + dotsLeft, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 30);
+    
+    // Afficher les vies et cerises à droite de la map (style Pac-Man original)
+    int rightX = BOARD_OFFSET_X + _board._nbCellsX * CELL_SIZE + 30;
+    int startY = BOARD_OFFSET_Y + 400;  // Plus bas pour éviter la légende des trajectoires
+    
+    // Titre
+    fill(255, 255, 0);
+    textSize(24);
+    text("VIES", rightX + 50, startY);
+    
+    // Dessiner les vies horizontalement (symboles Pac-Man)
+    fill(255, 255, 0);
+    for (int i = 0; i < _lives; i++) {
+      int x = rightX + i * 40;
+      int y = startY + 40;
+      // Dessiner un petit Pac-Man
+      arc(x + 15, y, 30, 30, radians(30), radians(330));
+    }
+    
+    // Cerises collectées (en dessous des vies)
+    fill(255, 255, 0);
+    textSize(24);
+    text("CERISES", rightX + 30, startY + 100);
+    
+    // Dessiner les cerises horizontalement
+    for (int i = 0; i < _cherriesCollected; i++) {
+      int x = rightX + i * 40;
+      int y = startY + 140;
+      // Dessiner une cerise
+      fill(255, 0, 0);
+      ellipse(x + 10, y, 20, 20);
+      ellipse(x + 25, y + 5, 20, 20);
+      stroke(0, 150, 0);
+      strokeWeight(2);
+      line(x + 17, y - 10, x + 17, y - 2);
+      noStroke();
+    }
   }
   
   // DEBUG - Affiche la légende des trajectoires des fantômes
@@ -370,6 +418,12 @@ class Game
   
   // Affiche "GAME OVER" avec animation
   void drawGameOver() {
+    // Si on entre le nom, afficher l'interface de saisie
+    if (_enteringName) {
+      drawNameEntry();
+      return;
+    }
+    
     // Overlay semi-transparent qui s'assombrit progressivement
     float overlayAlpha = min(_gameOverTimer * 2, 200);
     fill(0, 0, 0, overlayAlpha);
@@ -441,6 +495,46 @@ class Game
       textSize(18);
       text("↑ ↓ pour naviguer  |  ENTRÉE pour sélectionner", width/2, height - 60);
     }
+  }
+  
+  // Interface pour entrer le nom du joueur
+  void drawNameEntry() {
+    fill(0, 0, 0, 220);
+    rect(0, 0, width, height);
+    
+    fill(255, 255, 0);
+    textAlign(CENTER);
+    textSize(48);
+    text("NOUVEAU RECORD !", width/2, height/2 - 150);
+    
+    fill(255);
+    textSize(32);
+    text("Score: " + _score, width/2, height/2 - 80);
+    
+    textSize(24);
+    text("Entrez votre nom:", width/2, height/2 - 20);
+    
+    // Cadre pour le nom
+    stroke(255, 255, 0);
+    strokeWeight(3);
+    noFill();
+    rect(width/2 - 150, height/2 + 10, 300, 50, 10);
+    noStroke();
+    
+    // Afficher le nom en cours de saisie
+    fill(255, 255, 0);
+    textSize(32);
+    String displayName = _playerName;
+    if (frameCount % 30 < 15) {
+      displayName += "_";
+    }
+    text(displayName, width/2, height/2 + 45);
+    
+    // Instructions
+    fill(150);
+    textSize(18);
+    text("Appuyez sur ENTRÉE pour valider", width/2, height/2 + 120);
+    text("(Maximum 15 caractères)", width/2, height/2 + 145);
   }
   
   // Affiche "NIVEAU TERMINE"
@@ -576,6 +670,26 @@ class Game
   
   // Gestion des touches dans le menu de game over
   void handleGameOverMenu(int k) {
+    // Si on entre le nom, gérer la saisie
+    if (_enteringName) {
+      if (k == '\n' || k == '\r') {
+        // Valider le nom
+        if (_playerName.length() > 0) {
+          _highScores.addScore(_playerName, _score);
+          _enteringName = false;
+        }
+      } else if (k == 8 || k == 127) {
+        // Backspace
+        if (_playerName.length() > 0) {
+          _playerName = _playerName.substring(0, _playerName.length() - 1);
+        }
+      } else if (_playerName.length() < 15 && k >= 32 && k <= 126) {
+        // Ajouter le caractère
+        _playerName += (char)k;
+      }
+      return;
+    }
+    
     if (k == CODED) {
       if (keyCode == UP) {
         _gameOverOpt = (_gameOverOpt - 1 + 3) % 3;
@@ -594,6 +708,9 @@ class Game
         _dotsEaten = 0;
         _ghostCombo = 0;
         _extraLifeGiven = false;
+        _cherriesCollected = 0;
+        _enteringName = false;
+        _playerName = "";
         
         initializeBoard();
         initializeHero();

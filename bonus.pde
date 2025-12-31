@@ -346,4 +346,8 @@ class Bonus {
       _position = cellCenter.copy();
     }
   }
+  
+  String getType() {
+    return _type;
+  }
 }

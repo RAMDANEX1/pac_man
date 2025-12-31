@@ -76,7 +76,7 @@ DifficultySettings getDifficultySettings(int difficulty) {
   switch(difficulty) {
     case 0: // EASY (Niveau Chèvre)
       return new DifficultySettings(
-        5,      // 5 vies
+        3,      // 3 vies
         1.5,    // Fantômes très lents
         2.0,    // Fantômes effrayés très lents
         2.2,    // Clyde effrayé très lent
@@ -97,9 +97,9 @@ DifficultySettings getDifficultySettings(int difficulty) {
     default: // MEDIUM (1)
       return new DifficultySettings(
         3,      // 3 vies
-        3.0,    // Vitesse augmentée
-        3.5,    // Vitesse effrayé augmentée
-        3.8,    // Clyde effrayé rapide
+        3.3,    // Vitesse augmentée
+        3.6,    // Vitesse effrayé augmentée
+        3.9,    // Clyde effrayé rapide
         250,    // Durée réduite
         90,     // Sortie plus rapide
         10000   // Vie bonus à 10000 points
