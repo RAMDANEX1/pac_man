@@ -29,7 +29,8 @@ final float MOUTH_SPEED = 0.15;           // Vitesse d'animation de la bouche
 final int GHOST_COUNT = 4;                // Nombre de fantômes
 final float GHOST_SIZE = 28;              // Taille des fantômes
 final float GHOST_SPEED = 2.5;            // Vitesse normale des fantômes
-final float GHOST_SCARED_SPEED = 1.0;     // Vitesse quand effrayés
+final float GHOST_SCARED_SPEED = 3.2;     // Vitesse quand effrayés (un peu moins que Pac-Man)
+final float GHOST_SCARED_SPEED_CLYDE = 3.5; // Clyde un peu plus rapide en mode effrayé
 final int GHOST_SCARED_TIME = 300;        // Durée de l'effet super-gomme (frames)
 final int GHOST_RELEASE_DELAY = 120;      // Délai entre sorties de fantômes
 
@@ -55,3 +56,8 @@ final int BONUS_DURATION = 300;           // Durée bonus à l'écran
 final int SPRITE_SIZE = 48;               // Taille d'un sprite dans le spritesheet (6 carreaux × 8 pixels)
 final boolean USE_SPRITES = false;        // Activer/désactiver les sprites (DÉSACTIVÉ POUR DEBUG)
 final boolean DEBUG_SPRITES = false;      // Mode debug : afficher la grille du spritesheet
+
+// ===== DEBUG - TRAJECTOIRE DES FANTÔMES =====
+final boolean DEBUG_GHOST_PATH = true;    // Afficher les trajectoires des fantômes
+final int PATH_MAX_POINTS = 100;          // Nombre maximum de points dans la trajectoire
+final int PATH_UPDATE_INTERVAL = 3;       // Ajouter un point tous les X frames

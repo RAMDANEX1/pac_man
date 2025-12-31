@@ -13,6 +13,11 @@ class Hero {
   float _mouthAngle;         // Angle actuel de la bouche (pour animation)
   float _mouthDirection;     // Direction de l'animation (ouverture/fermeture)
   
+  // Animation de mort
+  boolean _dying;            // En train de mourir ?
+  int _deathTimer;           // Timer pour l'animation de mort
+  int _deathDuration;        // Durée totale de l'animation
+  
   // Déplacement
   PVector _direction;        // Direction actuelle (normalisée)
   PVector _nextDirection;    // Direction demandée par le joueur (buffer)
@@ -43,6 +48,11 @@ class Hero {
     _size = PACMAN_SIZE;
     _mouthAngle = 0;
     _mouthDirection = 1;  // 1 = ouverture, -1 = fermeture
+    
+    // Animation de mort
+    _dying = false;
+    _deathTimer = 0;
+    _deathDuration = 60;  // 60 frames = 1 seconde
   }
   
   // Lance un mouvement dans une direction donnée
@@ -66,6 +76,9 @@ class Hero {
       
       // Mettre à jour la position de cellule
       updateCellPosition();
+      
+      // Téléportation : si sort d'un côté, réapparaît de l'autre
+      checkTeleportation(board);
     } else {
       // Bloquer contre le mur : aligner sur le centre de la cellule
       PVector cellCenter = board.getCellCenter(_cellX, _cellY);
@@ -75,6 +88,27 @@ class Hero {
       
       // Arrêter le mouvement
       _moving = false;
+    }
+  }
+  
+  // Téléportation entre les bords de la carte
+  void checkTeleportation(Board board) {
+    // Téléportation horizontale (gauche <-> droite)
+    if (_cellX < 0) {
+      _cellX = board._nbCellsX - 1;
+      _position.x = board._position.x + _cellX * board._cellSize + board._cellSize / 2;
+    } else if (_cellX >= board._nbCellsX) {
+      _cellX = 0;
+      _position.x = board._position.x + _cellX * board._cellSize + board._cellSize / 2;
+    }
+    
+    // Téléportation verticale (haut <-> bas) - optionnel
+    if (_cellY < 0) {
+      _cellY = board._nbCellsY - 1;
+      _position.y = board._position.y + _cellY * board._cellSize + board._cellSize / 2;
+    } else if (_cellY >= board._nbCellsY) {
+      _cellY = 0;
+      _position.y = board._position.y + _cellY * board._cellSize + board._cellSize / 2;
     }
   }
   
@@ -119,6 +153,17 @@ class Hero {
   
   // Mise à jour générale de Pac-Man
   void update(Board board) {
+    // Si en train de mourir, jouer l'animation
+    if (_dying) {
+      _deathTimer++;
+      
+      // Ouvrir progressivement la bouche jusqu'à 180 degrés
+      float progress = (float)_deathTimer / _deathDuration;
+      _mouthAngle = 180 * progress;  // De 0 à 180 degrés
+      
+      return;  // Ne pas bouger pendant l'animation de mort
+    }
+    
     // Essayer de changer de direction si demandé
     tryChangeDirection();
     
@@ -129,6 +174,18 @@ class Hero {
     animateMouth();
     
     // Note: La vérification des gommes est maintenant gérée dans game.pde
+  }
+  
+  // Déclenche l'animation de mort
+  void die() {
+    _dying = true;
+    _deathTimer = 0;
+    _moving = false;
+  }
+  
+  // Retourne true si l'animation de mort est terminée
+  boolean deathAnimationComplete() {
+    return _dying && _deathTimer >= _deathDuration;
   }
   
   // Animation de la bouche (ouverture/fermeture)
@@ -152,9 +209,14 @@ class Hero {
   
   // Affiche Pac-Man
   void drawIt() {
+    // Si l'animation de mort est terminée, ne pas dessiner
+    if (_dying && _deathTimer >= _deathDuration) {
+      return;
+    }
+    
     // Calculer l'angle de rotation selon la direction
     float rotationAngle = 0;
-    if (_direction.mag() > 0) {
+    if (_direction.mag() > 0 && !_dying) {
       rotationAngle = atan2(_direction.y, _direction.x);
     }
     
@@ -162,8 +224,15 @@ class Hero {
     translate(_position.x, _position.y);
     rotate(rotationAngle);
     
+    // Calculer l'opacité pendant la mort (disparition progressive)
+    float alpha = 255;
+    if (_dying) {
+      float progress = (float)_deathTimer / _deathDuration;
+      alpha = 255 * (1 - progress);  // Disparaît progressivement
+    }
+    
     // Dessiner Pac-Man comme un "pac" (cercle avec bouche)
-    fill(COLOR_PACMAN);
+    fill(COLOR_PACMAN, alpha);
     noStroke();
     
     // Arc de cercle avec ouverture pour la bouche
@@ -172,11 +241,13 @@ class Hero {
         radians(360 - _mouthAngle), 
         PIE);
     
-    // Œil de Pac-Man
-    fill(0);
-    float eyeX = _size * 0.15;
-    float eyeY = -_size * 0.15;
-    circle(eyeX, eyeY, _size * 0.12);
+    // Œil de Pac-Man (sauf pendant la mort)
+    if (!_dying) {
+      fill(0);
+      float eyeX = _size * 0.15;
+      float eyeY = -_size * 0.15;
+      circle(eyeX, eyeY, _size * 0.12);
+    }
     
     popMatrix();
   }

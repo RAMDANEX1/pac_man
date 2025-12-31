@@ -1,7 +1,7 @@
 // ===== ÉNUMÉRATION DES TYPES DE CELLULES =====
 enum TypeCell 
 {
-  EMPTY,      // Case vide (chemin)
+  EMPTY,      // Case EMPTY (chemin)
   WALL,       // Mur
   DOT,        // Gomme normale
   SUPER_DOT   // Super-gomme (power pellet)
@@ -76,9 +76,9 @@ class Board
           case 'O': // Super-gomme
             _cells[y][x] = TypeCell.SUPER_DOT;
             break;
-          case 'V': // Case vide (zone fantômes)
-          case 'P': // Position Pac-Man (devient vide)
-          case ' ': // Espace vide
+          case 'V': // Case EMPTY (zone fantômes)
+          case 'P': // Position Pac-Man (devient EMPTY)
+          case ' ': // Espace EMPTY
             _cells[y][x] = TypeCell.EMPTY;
             break;
           default:
@@ -127,7 +127,7 @@ class Board
   // Initialise un niveau basique codé en dur
   void initializeHardcodedLevel() {
     // Créer un labyrinthe simple et original
-    // W = mur, E = vide, D = gomme, S = super-gomme
+    // W = mur, E = EMPTY, D = gomme, S = super-gomme
     
     // Remplir tout d'abord avec des murs
     for (int y = 0; y < _nbCellsY; y++) {
@@ -197,7 +197,7 @@ class Board
     _cells[19][1] = TypeCell.SUPER_DOT;
     _cells[19][17] = TypeCell.SUPER_DOT;
     
-    // Ajouter quelques zones vides pour la variété
+    // Ajouter quelques zones EMPTYs pour la variété
     _cells[10][9] = TypeCell.EMPTY;  // Centre
   }
   
@@ -251,7 +251,7 @@ class Board
         break;
         
       case EMPTY:
-        // Case vide : juste le fond noir
+        // Case EMPTY : juste le fond noir
         fill(COLOR_EMPTY);
         noStroke();
         rect(posX, posY, _cellSize, _cellSize);

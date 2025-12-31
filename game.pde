@@ -13,6 +13,17 @@ class Game
   
   boolean _gameOver;         // Partie terminée ?
   boolean _levelComplete;    // Niveau complété ?
+  boolean _paused;           // Jeu en pause ?
+  int _pauseMenuOption;      // Option sélectionnée dans le menu pause (0=Reprendre, 1=Menu)
+  
+  Bonus _bonus;              // Bonus/fruit
+  int _ghostCombo;           // Nombre de fantômes mangés pendant la super-gomme
+  boolean _extraLifeGiven;   // Vie bonus à 10 000 points donnée
+  
+  // Animation Game Over
+  int _gameOverTimer;        // Timer pour l'animation
+  int _gameOverMenuOption;   // Option sélectionnée (0=Rejouer, 1=Menu, 2=Quitter)
+  boolean _returnToMenu;     // Flag pour retourner au menu principal
   
   // Constructeur : initialise le jeu
   Game() {
@@ -23,7 +34,14 @@ class Game
     _lives = INITIAL_LIVES;
     _gameOver = false;
     _levelComplete = false;
+    _paused = false;
+    _pauseMenuOption = 0;
     _dotsEaten = 0;
+    _ghostCombo = 0;
+    _extraLifeGiven = false;
+    _gameOverTimer = 0;
+    _gameOverMenuOption = 0;
+    _returnToMenu = false;
     
     // Charger le niveau depuis le fichier
     initializeBoard();
@@ -33,6 +51,11 @@ class Game
     
     // Créer les fantômes
     initializeGhosts();
+    
+    // Créer le bonus (apparaitra au centre sous la cage)
+    if (_board != null) {
+      _bonus = new Bonus(_board, 11, 14, "orange");
+    }
     
     // Compter les gommes
     if (_board != null) {
@@ -70,23 +93,40 @@ class Game
     // Les positions V centrales sont x=9, 10, 11, 12, 13
     int ghostBoxY = 10;  // Ligne avec les V
     
-    // Tous les fantômes commencent dans la boîte centrale
-    // Blinky (rouge) - au centre, sort immédiatement
-    _ghosts[0] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_RED, "Blinky", 0);
+    // Configuration selon les spécifications :
+    // Blinky (rouge) - EN DEHORS de la cage, au-dessus (y=8)
+    _ghosts[0] = new Ghost(_board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
     
-    // Pinky (rose) - à gauche du centre, sort après 2 secondes
-    _ghosts[1] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_PINK, "Pinky", GHOST_RELEASE_DELAY);
+    // Pinky (rose) - AU MILIEU de la cage, sort en PREMIER (délai court)
+    _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", 60);
     
-    // Inky (cyan) - à droite du centre, sort après 4 secondes
-    _ghosts[2] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_CYAN, "Inky", GHOST_RELEASE_DELAY * 2);
+    // Inky (bleu) - À GAUCHE dans la cage, sort en DEUXIÈME (délai moyen)
+    _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", 120);
     
-    // Clyde (orange) - plus à gauche, sort après 6 secondes
-    _ghosts[3] = new Ghost(_board, 9, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", GHOST_RELEASE_DELAY * 3);
+    // Clyde (orange) - À DROITE dans la cage, sort en TROISIÈME (délai long)
+    _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", 180);
   }
   
   // Mise à jour du jeu (appelée à chaque frame)
   void update() {
-    if (_gameOver || _levelComplete) return;
+    if (_levelComplete || _paused) return;
+    
+    // Si game over, incrémenter le timer pour l'animation
+    if (_gameOver) {
+      _gameOverTimer++;
+      return;
+    }
+    
+    // Si Pac-Man est en train de mourir, attendre la fin de l'animation
+    if (_hero != null && _hero._dying) {
+      _hero.update(_board);  // Continuer l'animation
+      
+      // Si l'animation est terminée, réinitialiser
+      if (_hero.deathAnimationComplete()) {
+        loseLife();
+      }
+      return;  // Ne pas mettre à jour le reste du jeu
+    }
     
     // Mettre à jour Pac-Man
     if (_hero != null && _board != null) {
@@ -104,6 +144,27 @@ class Game
         // Vérifier les collisions avec Pac-Man
         checkGhostCollision(_ghosts[i]);
       }
+    }
+    
+    // Mettre à jour le bonus
+    if (_bonus != null) {
+      _bonus.update(_dotsEaten, _totalDots);
+      
+      // Vérifier si Pac-Man touche le bonus
+      if (_bonus.collidesWith(_hero)) {
+        int bonusScore = _bonus.collect();
+        if (bonusScore > 0) {
+          _score += bonusScore;
+          println("Bonus collecté ! +" + bonusScore + " points");
+        }
+      }
+    }
+    
+    // Vérifier si le joueur a atteint 10 000 points pour gagner une vie
+    if (_score >= 10000 && !_extraLifeGiven) {
+      _lives++;
+      _extraLifeGiven = true;
+      println("Vie bonus gagnée ! Score: " + _score);
     }
     
     // Vérifier si le niveau est terminé
@@ -131,6 +192,7 @@ class Game
         _dotsEaten++;
         
         // Effrayer tous les fantômes
+        _ghostCombo = 0;  // Réinitialiser le combo
         for (Ghost ghost : _ghosts) {
           if (ghost != null) {
             ghost.scare();
@@ -144,12 +206,19 @@ class Game
   void checkGhostCollision(Ghost ghost) {
     if (ghost.collidesWith(_hero)) {
       if (ghost.isScared()) {
-        // Manger le fantôme
-        _score += SCORE_GHOST;
-        ghost.reset();
-      } else {
-        // Perdre une vie
-        loseLife();
+        // Pac-Man mange le fantôme effrayé -> transformer en yeux
+        _ghostCombo++;
+        int ghostScore = SCORE_GHOST * (int)pow(2, _ghostCombo - 1); // 200, 400, 800, 1600
+        _score += ghostScore;
+        println("Fantôme mangé ! Combo x" + _ghostCombo + " = +" + ghostScore + " points");
+        
+        ghost._eyes = true;
+        ghost._scared = false;
+        ghost._scaredTimer = 0;
+      } else if (!_hero._dying) {  // Seulement si pas déjà en train de mourir
+        // Déclencher l'animation de mort
+        _ghostCombo = 0;  // Réinitialiser le combo
+        _hero.die();
       }
     }
   }
@@ -166,13 +235,14 @@ class Game
     }
   }
   
-  // Réinitialise les positions après une mort
+  // Réinitialise les positions après une mort de Pac-Man
   void resetPositions() {
     if (_hero != null) {
       PVector startPos = _board.findStartPosition("levels/level1.txt");
       _hero = new Hero(_board, (int)startPos.x, (int)startPos.y);
     }
     
+    // Réinitialiser les fantômes à leurs positions de départ
     for (Ghost ghost : _ghosts) {
       if (ghost != null) {
         ghost.reset();
@@ -195,8 +265,13 @@ class Game
     // Afficher les fantômes
     for (int i = 0; i < _ghosts.length; i++) {
       if (_ghosts[i] != null) {
-        _ghosts[i].drawIt(i);
+        _ghosts[i].drawIt();
       }
+    }
+    
+    // Afficher le bonus
+    if (_bonus != null) {
+      _bonus.drawIt();
     }
     
     // Afficher Pac-Man
@@ -207,11 +282,18 @@ class Game
     // Afficher le score et les informations
     drawGameInfo();
     
+    // DEBUG - Afficher la légende des trajectoires
+    if (DEBUG_GHOST_PATH) {
+      drawPathLegend();
+    }
+    
     // Afficher les messages de fin
     if (_gameOver) {
       drawGameOver();
     } else if (_levelComplete) {
       drawLevelComplete();
+    } else if (_paused) {
+      drawPauseMenu();
     }
   }
   
@@ -238,15 +320,115 @@ class Game
     text("GOMMES: " + dotsLeft, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 30);
   }
   
-  // Affiche "GAME OVER"
-  void drawGameOver() {
+  // DEBUG - Affiche la légende des trajectoires des fantômes
+  void drawPathLegend() {
+    int legendX = BOARD_OFFSET_X + _board._nbCellsX * CELL_SIZE + 50;
+    int legendY = BOARD_OFFSET_Y + 50;
+    
     fill(COLOR_TEXT);
+    textAlign(LEFT);
+    textSize(18);
+    text("TRAJECTOIRES:", legendX, legendY);
+    
+    // Légende pour chaque fantôme
+    String[] names = {"Blinky", "Pinky", "Inky", "Clyde"};
+    color[] colors = {COLOR_GHOST_RED, COLOR_GHOST_PINK, COLOR_GHOST_CYAN, COLOR_GHOST_ORANGE};
+    
+    for (int i = 0; i < names.length; i++) {
+      int y = legendY + 30 + i * 40;
+      
+      // Dessiner une ligne de démonstration
+      stroke(colors[i]);
+      strokeWeight(3);
+      line(legendX, y, legendX + 30, y);
+      
+      // Nom du fantôme
+      noStroke();
+      fill(colors[i]);
+      text(names[i], legendX + 40, y + 5);
+    }
+    
+    // Instructions
+    fill(COLOR_TEXT);
+    textSize(14);
+    text("Les lignes montrent", legendX, legendY + 200);
+    text("le chemin parcouru", legendX, legendY + 220);
+    text("par chaque fantôme.", legendX, legendY + 240);
+  }
+  
+  // Affiche "GAME OVER" avec animation
+  void drawGameOver() {
+    // Overlay semi-transparent qui s'assombrit progressivement
+    float overlayAlpha = min(_gameOverTimer * 2, 200);
+    fill(0, 0, 0, overlayAlpha);
+    rect(0, 0, width, height);
+    
+    // Attendre un peu avant d'afficher le texte
+    if (_gameOverTimer < 30) return;
+    
+    // Effet de pulsation sur le titre
+    float pulseScale = 1 + sin(_gameOverTimer * 0.1) * 0.05;
+    
+    pushMatrix();
+    translate(width/2, height/2 - 120);
+    scale(pulseScale);
+    
+    // Titre "GAME OVER" avec effet
+    fill(255, 50, 50);  // Rouge
     textAlign(CENTER);
-    textSize(48);
-    text("GAME OVER", width/2, height/2);
-    textSize(24);
-    text("Score: " + _score, width/2, height/2 + 50);
-    text("Appuyez sur R pour recommencer", width/2, height/2 + 90);
+    textSize(64);
+    text("GAME OVER", 0, 0);
+    
+    popMatrix();
+    
+    // Attendre encore un peu pour le reste
+    if (_gameOverTimer < 60) return;
+    
+    // Score final
+    fill(COLOR_TEXT);
+    textSize(32);
+    text("Score Final: " + _score, width/2, height/2 - 20);
+    
+    // Séparateur
+    stroke(255, 255, 255, 100);
+    strokeWeight(2);
+    line(width/2 - 200, height/2 + 20, width/2 + 200, height/2 + 20);
+    noStroke();
+    
+    // Menu d'options
+    String[] options = {"REJOUER", "MENU PRINCIPAL", "QUITTER"};
+    
+    for (int i = 0; i < options.length; i++) {
+      float yPos = height/2 + 80 + i * 60;
+      
+      // Surbrillance de l'option sélectionnée
+      if (i == _gameOverMenuOption) {
+        // Rectangle de sélection avec animation
+        float pulseSize = sin(_gameOverTimer * 0.15) * 5;
+        fill(255, 255, 0, 100);
+        rectMode(CENTER);
+        rect(width/2, yPos, 280 + pulseSize, 50, 10);
+        rectMode(CORNER);
+        
+        // Texte en jaune
+        fill(255, 255, 0);
+        textSize(32);
+      } else {
+        // Texte en blanc
+        fill(200);
+        textSize(28);
+      }
+      
+      text(options[i], width/2, yPos + 5);
+    }
+    
+    // Instructions en bas
+    if (_gameOverTimer > 90) {
+      float alpha = min((_gameOverTimer - 90) * 3, 255);
+      fill(150, 150, 150, alpha);
+      textSize(18);
+      text("↑ ↓ pour naviguer  |  ENTRÉE pour sélectionner", width/2, height - 60);
+    }
   }
   
   // Affiche "NIVEAU TERMINE"
@@ -260,29 +442,64 @@ class Game
     text("Appuyez sur R pour recommencer", width/2, height/2 + 90);
   }
   
+  // Affiche le menu pause
+  void drawPauseMenu() {
+    // Overlay semi-transparent
+    fill(0, 0, 0, 180);
+    rect(0, 0, width, height);
+    
+    // Titre
+    fill(COLOR_TEXT);
+    textAlign(CENTER);
+    textSize(56);
+    text("PAUSE", width/2, height/2 - 100);
+    
+    // Options du menu pause
+    String[] options = {"REPRENDRE", "MENU PRINCIPAL"};
+    int startY = height/2;
+    int spacing = 80;
+    
+    for (int i = 0; i < options.length; i++) {
+      int y = startY + i * spacing;
+      
+      // Highlight de l'option sélectionnée
+      if (i == _pauseMenuOption) {
+        fill(#FFFF00);
+        textSize(40);
+        // Flèches indicatrices
+        text("►", width/2 - 180, y);
+        text("◄", width/2 + 180, y);
+      } else {
+        fill(#FFFFFF);
+        textSize(32);
+      }
+      
+      text(options[i], width/2, y);
+    }
+    
+    // Instructions en bas
+    fill(#888888);
+    textSize(18);
+    text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner", width/2, height - 50);
+  }
+  
   // Gestion des touches clavier
   void handleKey(int k) {
     if (_hero == null) return;
     
-    // Recommencer si Game Over ou Level Complete
-    if ((_gameOver || _levelComplete) && (k == 'r' || k == 'R')) {
-      // Réinitialiser le jeu
-      _score = 0;
-      _lives = INITIAL_LIVES;
-      _gameOver = false;
-      _levelComplete = false;
-      _dotsEaten = 0;
-      
-      initializeBoard();
-      initializeHero();
-      initializeGhosts();
-      
-      if (_board != null) {
-        _totalDots = _board.countTotalDots();
-      }
+    // Gérer le menu de game over
+    if (_gameOver) {
+      handleGameOverMenu(k);
       return;
     }
     
+    // Gérer le menu pause
+    if (_paused) {
+      handlePauseMenu(k);
+      return;
+    }
+    
+    // Touche ECHAP pour mettre en pause
     if (_gameOver || _levelComplete) return;
     
     // Déplacements avec les flèches ou ZQSD
@@ -319,5 +536,92 @@ class Game
         println("Pour activer le mode debug, change DEBUG_SPRITES = true dans constants.pde");
       }
     }
+  }
+  
+  // Gestion des touches dans le menu pause
+  void handlePauseMenu(int k) {
+    if (k == CODED) {
+      if (keyCode == UP) {
+        _pauseMenuOption--;
+        if (_pauseMenuOption < 0) {
+          _pauseMenuOption = 1;
+        }
+      } else if (keyCode == DOWN) {
+        _pauseMenuOption++;
+        if (_pauseMenuOption > 1) {
+          _pauseMenuOption = 0;
+        }
+      }
+    } else if (k == '\n' || k == '\r') {
+      // ENTRÉE pressée
+      if (_pauseMenuOption == 0) {
+        // Reprendre le jeu
+        _paused = false;
+      }
+      // Si option 1 (Menu Principal), ce sera géré dans pacman.pde
+    }
+  }
+  
+  // Gestion des touches dans le menu de game over
+  void handleGameOverMenu(int k) {
+    if (k == CODED) {
+      if (keyCode == UP) {
+        _gameOverMenuOption = (_gameOverMenuOption - 1 + 3) % 3;
+      } else if (keyCode == DOWN) {
+        _gameOverMenuOption = (_gameOverMenuOption + 1) % 3;
+      }
+    } else if (k == '\n' || k == '\r') {  // Touche Entrée
+      if (_gameOverMenuOption == 0) {
+        // Rejouer
+        _score = 0;
+        _lives = INITIAL_LIVES;
+        _gameOver = false;
+        _gameOverTimer = 0;
+        _gameOverMenuOption = 0;
+        _levelComplete = false;
+        _dotsEaten = 0;
+        _ghostCombo = 0;
+        _extraLifeGiven = false;
+        
+        initializeBoard();
+        initializeHero();
+        initializeGhosts();
+        
+        if (_board != null) {
+          _totalDots = _board.countTotalDots();
+          _bonus = new Bonus(_board, 11, 14, "orange");
+        }
+      } else if (_gameOverMenuOption == 1) {
+        // Retour au menu principal
+        _returnToMenu = true;
+      } else if (_gameOverMenuOption == 2) {
+        // Quitter
+        exit();
+      }
+    }
+  }
+  
+  // Active/désactive la pause
+  void togglePause() {
+    if (!_gameOver && !_levelComplete) {
+      _paused = !_paused;
+      if (_paused) {
+        _pauseMenuOption = 0; // Réinitialiser à "REPRENDRE"
+      }
+    }
+  }
+  
+  // Retourne true si on doit retourner au menu principal
+  boolean shouldReturnToMenu() {
+    return _returnToMenu;
+  }
+  
+  // Getters
+  boolean isPaused() {
+    return _paused;
+  }
+  
+  int getPauseMenuOption() {
+    return _pauseMenuOption;
   }
 }
