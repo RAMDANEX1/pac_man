@@ -9,6 +9,8 @@ class Bonus {
   int _timer;                   // Temps restant avant disparition
   int _spawnTimer;              // Timer avant apparition
   Board _board;                 // Référence au plateau
+  int _spawnCount;              // Nombre de fois que le bonus est apparu
+  boolean _hasSpawned;          // A déjà spawn pour ce seuil
   
   // Constructeur
   Bonus(Board board, int cellX, int cellY, String type) {
@@ -19,6 +21,14 @@ class Bonus {
     _active = false;
     _timer = BONUS_DURATION;
     _spawnTimer = BONUS_SPAWN_TIME;
+    _spawnCount = 0;
+    _hasSpawned = false;
+    
+    // Choisir une position aléatoire au début
+    chooseRandomPosition();
+    
+    // Choisir une position aléatoire au début
+    chooseRandomPosition();
     
     // Configuration selon le type
     switch(type) {
@@ -55,27 +65,85 @@ class Bonus {
   // Mise à jour du bonus
   void update(int dotsEaten, int totalDots) {
     if (!_active) {
-      // Vérifier si on doit faire apparaître le bonus
-      // Apparaît après avoir mangé 50% des gommes
-      if (dotsEaten >= totalDots * 0.5 && _spawnTimer > 0) {
-        _spawnTimer--;
-        if (_spawnTimer <= 0) {
-          spawn();
-        }
+      // Déterminer quel fruit faire apparaître selon les gommes mangées
+      String newType = null;
+      boolean shouldSpawn = false;
+      
+      if (dotsEaten >= 70 && _spawnCount == 0) {
+        newType = "cherry";     // 70 gommes -> cerise (100 pts)
+        shouldSpawn = true;
+        _spawnCount = 1;
+      } else if (dotsEaten >= 100 && _spawnCount == 1) {
+        newType = "strawberry"; // 100 gommes -> fraise (300 pts)
+        shouldSpawn = true;
+        _spawnCount = 2;
+      } else if (dotsEaten >= 130 && _spawnCount == 2) {
+        newType = "orange";     // 130 gommes -> orange (500 pts)
+        shouldSpawn = true;
+        _spawnCount = 3;
+      } else if (dotsEaten >= 160 && _spawnCount == 3) {
+        newType = "apple";      // 160 gommes -> pomme (700 pts)
+        shouldSpawn = true;
+        _spawnCount = 4;
+      } else if (dotsEaten >= 190 && _spawnCount == 4) {
+        newType = "melon";      // 190 gommes -> melon (1000 pts)
+        shouldSpawn = true;
+        _spawnCount = 5;
+      }
+      
+      if (shouldSpawn && newType != null) {
+        changeType(newType);
+        spawn();
       }
     } else {
       // Décrémenter le timer
       _timer--;
       if (_timer <= 0) {
         _active = false;
+        println("Bonus disparu!");
       }
     }
   }
   
   // Fait apparaître le bonus
   void spawn() {
+    // Choisir une nouvelle position aléatoire à chaque apparition
+    chooseRandomPosition();
+    
     _active = true;
     _timer = BONUS_DURATION;
+    println("Bonus actif! Type: " + _type + ", Score: " + _score + ", Position: (" + _cellX + ", " + _cellY + ")");
+  }
+  
+  // Change le type de fruit
+  void changeType(String newType) {
+    _type = newType;
+    
+    // Mettre à jour le score et la couleur selon le nouveau type
+    switch(newType) {
+      case "cherry":
+        _score = 100;
+        _color = #FF0000;  // Rouge
+        break;
+      case "strawberry":
+        _score = 300;
+        _color = #FF69B4;  // Rose
+        break;
+      case "orange":
+        _score = 500;
+        _color = #FFA500;  // Orange
+        break;
+      case "apple":
+        _score = 700;
+        _color = #FF0000;  // Rouge foncé
+        break;
+      case "melon":
+        _score = 1000;
+        _color = #00FF00;  // Vert
+        break;
+    }
+    
+    println("Nouveau type de fruit: " + _type + " (" + _score + " points)");
   }
   
   // Collecte le bonus
@@ -246,5 +314,36 @@ class Bonus {
     _active = false;
     _spawnTimer = BONUS_SPAWN_TIME;
     _timer = BONUS_DURATION;
+  }
+  
+  // Choisit une position aléatoire parmi les espaces vides/gommes
+  void chooseRandomPosition() {
+    // Lister toutes les positions possibles (vides, gommes, super-gommes)
+    ArrayList<PVector> validPositions = new ArrayList<PVector>();
+    
+    for (int y = 1; y < _board._nbCellsY - 1; y++) {
+      for (int x = 1; x < _board._nbCellsX - 1; x++) {
+        TypeCell cell = _board.getCellType(x, y);
+        // Accepter les espaces vides, gommes et super-gommes (pas les murs)
+        if (cell == TypeCell.EMPTY || cell == TypeCell.DOT || cell == TypeCell.SUPER_DOT) {
+          // Éviter la zone de la cage des fantômes (autour de x=11, y=10)
+          if (abs(x - 11) > 3 || abs(y - 10) > 2) {
+            validPositions.add(new PVector(x, y));
+          }
+        }
+      }
+    }
+    
+    // Choisir une position au hasard
+    if (validPositions.size() > 0) {
+      int randomIndex = (int)random(validPositions.size());
+      PVector chosen = validPositions.get(randomIndex);
+      _cellX = (int)chosen.x;
+      _cellY = (int)chosen.y;
+      
+      // Mettre à jour la position pixel
+      PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
+      _position = cellCenter.copy();
+    }
   }
 }

@@ -54,7 +54,7 @@ class Game
     
     // Créer le bonus (apparaitra au centre sous la cage)
     if (_board != null) {
-      _bonus = new Bonus(_board, 11, 14, "orange");
+      _bonus = new Bonus(_board, 11, 12, "cherry");  // Position sous la cage des fantômes
     }
     
     // Compter les gommes
@@ -589,7 +589,7 @@ class Game
         
         if (_board != null) {
           _totalDots = _board.countTotalDots();
-          _bonus = new Bonus(_board, 11, 14, "orange");
+          _bonus = new Bonus(_board, 11, 12, "cherry");
         }
       } else if (_gameOverMenuOption == 1) {
         // Retour au menu principal

@@ -340,18 +340,28 @@ class Ghost {
       }
       
     } else if (_name.equals("Clyde")) {
-      // CLYDE (orange) : de temps en temps, change de direction aléatoirement
-      _behaviorTimer--;
-      if (_behaviorTimer <= 0) {
-        _behaviorTimer = (int)random(120, 240); // Change tous les 2-4 secondes
-      }
+      // CLYDE (orange) : fuit seulement quand TRÈS proche (< 3 cases)
+      float distToPacman = dist(_cellX, _cellY, heroX, heroY);
       
-      if (_behaviorTimer > 180) {
-        // Direction aléatoire
-        return new PVector(random(_board._nbCellsX), random(_board._nbCellsY));
+      if (distToPacman < 3) {
+        // Très proche ! Fuir dans la direction opposée
+        int targetX = _cellX - (heroX - _cellX);
+        int targetY = _cellY - (heroY - _cellY);
+        return new PVector(targetX, targetY);
       } else {
-        // Suit Pac-Man
-        return new PVector(heroX, heroY);
+        // Pas trop proche : comportement aléatoire/poursuite
+        _behaviorTimer--;
+        if (_behaviorTimer <= 0) {
+          _behaviorTimer = (int)random(120, 240);
+        }
+        
+        if (_behaviorTimer > 180) {
+          // Direction aléatoire
+          return new PVector(random(_board._nbCellsX), random(_board._nbCellsY));
+        } else {
+          // Suit Pac-Man
+          return new PVector(heroX, heroY);
+        }
       }
     }
     

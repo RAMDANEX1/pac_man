@@ -3,8 +3,7 @@ class Hero {
   // Position à l'écran (coordonnées pixel)
   PVector _position;
   PVector _posOffset;        // Offset par rapport au centre de la cellule
-  PImage spriteSheet;  // Ajouter cette ligne
-  PImage[] sprites;    // Pour stocker les frames d'animation
+  
   // Position sur le plateau (coordonnées grille)
   int _cellX, _cellY;
   
