@@ -1,16 +1,16 @@
-// ===== CLASSE BONUS : FRUITS ET BONUS =====
+// Classe Bonus (fruits)
 class Bonus {
-  int _cellX, _cellY;           // Position sur la grille
-  PVector _position;            // Position pixel
-  int _score;                   // Points donnés
-  String _type;                 // Type de bonus ("cherry", "strawberry", "orange"...)
-  color _color;                 // Couleur du bonus
-  boolean _active;              // Actif ou non
-  int _timer;                   // Temps restant avant disparition
-  int _spawnTimer;              // Timer avant apparition
-  Board _board;                 // Référence au plateau
-  int _spawnCount;              // Nombre de fois que le bonus est apparu
-  boolean _hasSpawned;          // A déjà spawn pour ce seuil
+  int _cellX, _cellY;
+  PVector _position;
+  int _score;
+  String _type;
+  color _color;
+  boolean _active;
+  int _timer;
+  int _spawnTimer;
+  Board _board;
+  int _spawnCount;
+  boolean _hasSpawned;
   
   // Constructeur
   Bonus(Board board, int cellX, int cellY, String type) {

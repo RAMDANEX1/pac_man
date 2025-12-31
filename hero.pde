@@ -1,32 +1,30 @@
-// ===== CLASSE HERO : PAC-MAN =====
+// Classe Hero (Pac-Man)
 class Hero {
-  // Position à l'écran (coordonnées pixel)
   PVector _position;
-  PVector _posOffset;        // Offset par rapport au centre de la cellule
+  PVector _posOffset;
   
-  // Position sur le plateau (coordonnées grille)
+  // Position grille
   int _cellX, _cellY;
   
   // Affichage
-  float _size;               // Taille de Pac-Man
-  float _mouthAngle;         // Angle actuel de la bouche (pour animation)
-  float _mouthDirection;     // Direction de l'animation (ouverture/fermeture)
+  float _size;
+  float _mouthAngle;
+  float _mouthDirection;
   
   // Animation de mort
-  boolean _dying;            // En train de mourir ?
-  int _deathTimer;           // Timer pour l'animation de mort
-  int _deathDuration;        // Durée totale de l'animation
+  boolean _dying;
+  int _deathTimer;
+  int _deathDuration;
   
   // Déplacement
-  PVector _direction;        // Direction actuelle (normalisée)
-  PVector _nextDirection;    // Direction demandée par le joueur (buffer)
-  boolean _moving;           // Est en mouvement ?
-  float _speed;              // Vitesse en pixels par frame
+  PVector _direction;
+  PVector _nextDirection;
+  boolean _moving;
+  float _speed;
   
-  // Référence au plateau pour les collisions
   Board _board;
   
-  // Constructeur : initialise Pac-Man à une position donnée
+  // Constructeur
   Hero(Board board, int startCellX, int startCellY) {
     _board = board;
     _cellX = startCellX;
@@ -37,21 +35,18 @@ class Hero {
     _position = cellCenter.copy();
     _posOffset = new PVector(0, 0);
     
-    // Initialisation du mouvement
-    _direction = new PVector(0, 0);      // Immobile au départ
-    _nextDirection = new PVector(0, 0);  // Pas de direction demandée
+    _direction = new PVector(0, 0);
+    _nextDirection = new PVector(0, 0);
     _moving = false;
     _speed = PACMAN_SPEED;
     
-    // Initialisation de l'apparence
     _size = PACMAN_SIZE;
     _mouthAngle = 0;
-    _mouthDirection = 1;  // 1 = ouverture, -1 = fermeture
+    _mouthDirection = 1;
     
-    // Animation de mort
     _dying = false;
     _deathTimer = 0;
-    _deathDuration = 60;  // 60 frames = 1 seconde
+    _deathDuration = 60; // 1 sec
   }
   
   // Lance un mouvement dans une direction donnée

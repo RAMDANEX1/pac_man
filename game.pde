@@ -1,4 +1,4 @@
-// ===== CLASSE GAME : GESTIONNAIRE PRINCIPAL DU JEU =====
+// Classe Game - gère la partie
 class Game 
 {
   Board _board;              // Le plateau de jeu
@@ -20,14 +20,20 @@ class Game
   int _ghostCombo;           // Nombre de fantômes mangés pendant la super-gomme
   boolean _extraLifeGiven;   // Vie bonus à 10 000 points donnée
   
+  // High Scores
+  HighScores _highScores;
+  boolean _enteringName;     // En train d'entrer le nom
+  String _playerName;        // Nom du joueur
+  int _cherriesCollected;    // Nombre de cerises mangées
+  
   // Animation Game Over
   int _gameOverTimer;        // Timer pour l'animation
-  int _gameOverMenuOption;   // Option sélectionnée (0=Rejouer, 1=Menu, 2=Quitter)
+  int _gameOverOpt;   // Option sélectionnée (0=Rejouer, 1=Menu, 2=Quitter)
   boolean _returnToMenu;     // Flag pour retourner au menu principal
   
   // Difficulté
   int _difficulty;           // 0=EASY, 1=MEDIUM, 2=HARD
-  DifficultySettings _difficultySettings;
+  DifficultySettings _diffSettings;
   
   // Constructeur : initialise le jeu
   Game(int difficulty) {
@@ -36,8 +42,8 @@ class Game
     _ghosts = new Ghost[GHOST_COUNT];
     _score = 0;
     _difficulty = difficulty;
-    _difficultySettings = getDifficultySettings(difficulty);
-    _lives = _difficultySettings.lives;
+    _diffSettings = getDifficultySettings(difficulty);
+    _lives = _diffSettings.lives;
     _gameOver = false;
     _levelComplete = false;
     _paused = false;
@@ -46,8 +52,13 @@ class Game
     _ghostCombo = 0;
     _extraLifeGiven = false;
     _gameOverTimer = 0;
-    _gameOverMenuOption = 0;
+    _gameOverOpt = 0;
     _returnToMenu = false;
+    
+    _highScores = new HighScores();
+    _enteringName = false;
+    _playerName = "";
+    _cherriesCollected = 0;
     
     // Charger le niveau depuis le fichier
     initializeBoard();
@@ -69,62 +80,48 @@ class Game
     }
   }
   
-  // Initialise le plateau de jeu depuis un fichier
+  // Initialise le plateau
   void initializeBoard() {
     PVector boardPosition = new PVector(BOARD_OFFSET_X, BOARD_OFFSET_Y);
     
-    // Essayer de charger depuis le fichier
     String levelPath = "levels/level1.txt";
     _board = new Board(boardPosition, CELL_SIZE, levelPath);
-    
-    // Ajuster la taille de la fenêtre si nécessaire (optionnel)
-    // surface.setSize(_board._nbCellsX * CELL_SIZE + 100, _board._nbCellsY * CELL_SIZE + 150);
   }
   
   // Initialise Pac-Man
   void initializeHero() {
     if (_board != null) {
-      // Trouver la position 'P' dans le fichier
       PVector startPos = _board.findStartPosition("levels/level1.txt");
       _hero = new Hero(_board, (int)startPos.x, (int)startPos.y);
     }
   }
   
-  // Initialise les 4 fantômes avec des positions et délais différents
   void initializeGhosts() {
     if (_board == null) return;
     
-    // La boîte des fantômes est sur la ligne avec beaucoup de V (ligne 11 du fichier = y=10)
-    // Ligne: VVVVVVVVxVVVVVxVVVVVVVV
-    // Les positions V centrales sont x=9, 10, 11, 12, 13
-    int ghostBoxY = 10;  // Ligne avec les V
+    int ghostBoxY = 10;
+    int baseDelay = _diffSettings.releaseDelay;
     
-    // Utiliser les délais de sortie selon la difficulté
-    int baseDelay = _difficultySettings.releaseDelay;
-    
-    // Configuration selon les spécifications :
-    // Blinky (rouge) - EN DEHORS de la cage, au-dessus (y=8)
+    // Blinky (rouge)
     _ghosts[0] = new Ghost(_board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
-    _ghosts[0]._speed = _difficultySettings.ghostSpeed;
+    _ghosts[0]._speed = _diffSettings.ghostSpeed;
     
-    // Pinky (rose) - AU MILIEU de la cage, sort en PREMIER (délai court)
+    // Pinky (rose)
     _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", (int)(baseDelay * 0.5));
-    _ghosts[1]._speed = _difficultySettings.ghostSpeed;
+    _ghosts[1]._speed = _diffSettings.ghostSpeed;
     
-    // Inky (bleu) - À GAUCHE dans la cage, sort en DEUXIÈME (délai moyen)
+    // Inky (bleu)  
     _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", baseDelay);
-    _ghosts[2]._speed = _difficultySettings.ghostSpeed;
+    _ghosts[2]._speed = _diffSettings.ghostSpeed;
     
-    // Clyde (orange) - À DROITE dans la cage, sort en TROISIÈME (délai long)
+    // Clyde (orange)
     _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", (int)(baseDelay * 1.5));
-    _ghosts[3]._speed = _difficultySettings.ghostSpeed;
+    _ghosts[3]._speed = _diffSettings.ghostSpeed;
   }
   
-  // Mise à jour du jeu (appelée à chaque frame)
   void update() {
     if (_levelComplete || _paused) return;
     
-    // Si game over, incrémenter le timer pour l'animation
     if (_gameOver) {
       _gameOverTimer++;
       return;
@@ -174,7 +171,7 @@ class Game
     }
     
     // Vérifier si le joueur a atteint le seuil pour gagner une vie (selon la difficulté)
-    if (_score >= _difficultySettings.extraLifeScore && !_extraLifeGiven) {
+    if (_score >= _diffSettings.extraLifeScore && !_extraLifeGiven) {
       _lives++;
       _extraLifeGiven = true;
       println("Vie bonus gagnée ! Score: " + _score);
@@ -208,9 +205,9 @@ class Game
         _ghostCombo = 0;  // Réinitialiser le combo
         for (Ghost ghost : _ghosts) {
           if (ghost != null) {
-            ghost.scare(_difficultySettings.scaredDuration, 
-                       _difficultySettings.ghostScaredSpeed, 
-                       _difficultySettings.ghostScaredSpeedClyde);
+            ghost.scare(_diffSettings.scaredDuration, 
+                       _diffSettings.ghostScaredSpeed, 
+                       _diffSettings.ghostScaredSpeedClyde);
           }
         }
       }
@@ -417,7 +414,7 @@ class Game
       float yPos = height/2 + 80 + i * 60;
       
       // Surbrillance de l'option sélectionnée
-      if (i == _gameOverMenuOption) {
+      if (i == _gameOverOpt) {
         // Rectangle de sélection avec animation
         float pulseSize = sin(_gameOverTimer * 0.15) * 5;
         fill(255, 255, 0, 100);
@@ -581,18 +578,18 @@ class Game
   void handleGameOverMenu(int k) {
     if (k == CODED) {
       if (keyCode == UP) {
-        _gameOverMenuOption = (_gameOverMenuOption - 1 + 3) % 3;
+        _gameOverOpt = (_gameOverOpt - 1 + 3) % 3;
       } else if (keyCode == DOWN) {
-        _gameOverMenuOption = (_gameOverMenuOption + 1) % 3;
+        _gameOverOpt = (_gameOverOpt + 1) % 3;
       }
     } else if (k == '\n' || k == '\r') {  // Touche Entrée
-      if (_gameOverMenuOption == 0) {
+      if (_gameOverOpt == 0) {
         // Rejouer avec la même difficulté
         _score = 0;
-        _lives = _difficultySettings.lives;
+        _lives = _diffSettings.lives;
         _gameOver = false;
         _gameOverTimer = 0;
-        _gameOverMenuOption = 0;
+        _gameOverOpt = 0;
         _levelComplete = false;
         _dotsEaten = 0;
         _ghostCombo = 0;
@@ -606,10 +603,10 @@ class Game
           _totalDots = _board.countTotalDots();
           _bonus = new Bonus(_board, 11, 12, "cherry");
         }
-      } else if (_gameOverMenuOption == 1) {
+      } else if (_gameOverOpt == 1) {
         // Retour au menu principal
         _returnToMenu = true;
-      } else if (_gameOverMenuOption == 2) {
+      } else if (_gameOverOpt == 2) {
         // Quitter
         exit();
       }
@@ -629,14 +626,5 @@ class Game
   // Retourne true si on doit retourner au menu principal
   boolean shouldReturnToMenu() {
     return _returnToMenu;
-  }
-  
-  // Getters
-  boolean isPaused() {
-    return _paused;
-  }
-  
-  int getPauseMenuOption() {
-    return _pauseMenuOption;
   }
 }

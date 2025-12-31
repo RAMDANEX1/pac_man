@@ -40,15 +40,15 @@ void draw() {
 void keyPressed() {
   if (inMenu) {
     // Vérifier l'état AVANT de gérer la touche
-    boolean wasSelectingDifficulty = menu.isSelectingDifficulty();
+    boolean wasSelectingDifficulty = menu._selectingDifficulty;
     
     menu.handleKey(key);
     
     // Si l'utilisateur a sélectionné une difficulté (et était déjà dans cet écran)
     if (key == '\n' || key == '\r') {
-      if (wasSelectingDifficulty && menu.isSelectingDifficulty()) {
+      if (wasSelectingDifficulty && menu._selectingDifficulty) {
         // Démarrer le jeu avec la difficulté sélectionnée
-        int difficulty = menu.getSelectedDifficulty();
+        int difficulty = menu._selectedDifficulty;
         println("=== DÉMARRAGE DU JEU (Difficulté: " + difficulty + ") ===");
         game = new Game(difficulty);
         inMenu = false;
@@ -61,9 +61,9 @@ void keyPressed() {
       if (key == ESC) {
         game.togglePause();
         key = 0; // Empêcher la fermeture de l'application
-      } else if (game.isPaused() && (key == '\n' || key == '\r')) {
+      } else if (game._paused && (key == '\n' || key == '\r')) {
         // Dans le menu pause, ENTRÉE est pressée
-        if (game.getPauseMenuOption() == 1) {
+        if (game._pauseMenuOption == 1) {
           // Option "MENU PRINCIPAL" sélectionnée
           inMenu = true;
           menu.reset();

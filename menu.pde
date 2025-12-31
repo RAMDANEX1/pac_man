@@ -1,4 +1,4 @@
-// ===== CLASSE MENU : ÉCRAN DE DÉMARRAGE ET MENU PRINCIPAL =====
+// Menu principal
 class Menu {
   int _selectedOption;           // Option sélectionnée (0, 1, 2...)
   boolean _animatePacman;        // Animation Pac-Man
@@ -385,13 +385,5 @@ class Menu {
   
   boolean isShowingInstructions() {
     return _showingInstructions;
-  }
-  
-  boolean isSelectingDifficulty() {
-    return _selectingDifficulty;
-  }
-  
-  int getSelectedDifficulty() {
-    return _selectedDifficulty;
   }
 }

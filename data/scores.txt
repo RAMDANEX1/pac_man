@@ -1,0 +1,5 @@
+Anonymous,5000
+Player,3000
+Test,1500
+Demo,1000
+Start,500

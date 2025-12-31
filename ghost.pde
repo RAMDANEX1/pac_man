@@ -1,36 +1,32 @@
-// ===== CLASSE GHOST : FANTÔME =====
+// Classe Ghost
 class Ghost {
-  // Position à l'écran (coordonnées pixel)
   PVector _position;
   
-  // Position sur le plateau (coordonnées grille)
   int _cellX, _cellY;
   
   // Affichage
   float _size;
-  color _color;              // Couleur normale du fantôme
-  String _name;              // Nom du fantôme
+  color _color;
+  String _name;
   
   // Déplacement
   PVector _direction;
   float _speed;
   boolean _moving;
   
-  // États du fantôme
-  boolean _scared;           // Effrayé (après super-gomme)
-  int _scaredTimer;          // Temps restant en mode effrayé
-  boolean _released;         // Sorti de la zone de départ
-  int _releaseTimer;         // Temps avant la sortie
-  PVector _homePosition;     // Position de départ
-  boolean _eyes;             // Mode yeux (retour à la cage après être mangé)
-  int _behaviorTimer;        // Timer pour comportements aléatoires
+  boolean _scared;
+  int _scaredTimer;
+  boolean _released;
+  int _releaseTimer;
+  PVector _homePosition;
+  boolean _eyes;
+  int _behaviorTimer;
   
-  // Référence au plateau
   Board _board;
   
-  // DEBUG - Trajectoire
-  ArrayList<PVector> _pathPoints;      // Liste des points de la trajectoire
-  int _pathUpdateCounter;              // Compteur pour espacer les points
+  // DEBUG
+  ArrayList<PVector> _pathPoints;
+  int _pathUpdateCounter;
   
   // Constructeur
   Ghost(Board board, int startCellX, int startCellY, color ghostColor, String name, int releaseDelay) {

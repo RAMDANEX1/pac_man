@@ -1,22 +1,22 @@
-// ===== ÉNUMÉRATION DES TYPES DE CELLULES =====
+// Types de cellules
 enum TypeCell 
 {
-  EMPTY,      // Case EMPTY (chemin)
-  WALL,       // Mur
-  DOT,        // Gomme normale
-  SUPER_DOT   // Super-gomme (power pellet)
+  EMPTY,
+  WALL,
+  DOT,
+  SUPER_DOT
 }
 
-// ===== CLASSE BOARD : GESTION DU PLATEAU =====
+// Classe Board (plateau de jeu)
 class Board 
 {
-  TypeCell[][] _cells;    // Tableau 2D représentant le plateau
-  PVector _position;      // Position du plateau à l'écran
-  int _nbCellsX;          // Nombre de cellules horizontales
-  int _nbCellsY;          // Nombre de cellules verticales
-  int _cellSize;          // Taille d'une cellule (carrée)
+  TypeCell[][] _cells;
+  PVector _position;
+  int _nbCellsX;
+  int _nbCellsY;
+  int _cellSize;
   
-  // Constructeur : initialise le plateau avec un niveau "en dur"
+  // Constructeur
   Board(PVector position, int nbCellsX, int nbCellsY, int cellSize) {
     _position = position;
     _nbCellsX = nbCellsX;
