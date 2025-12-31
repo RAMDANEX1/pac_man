@@ -11,6 +11,11 @@ class Menu {
   // État des instructions
   boolean _showingInstructions;
   
+  // État de sélection de difficulté
+  boolean _selectingDifficulty;
+  int _selectedDifficulty;       // 0=EASY, 1=MEDIUM, 2=HARD
+  String[] _difficultyOptions = {"NIVEAU CHÈVRE", "MOYEN", "DIFFICILE"};
+  
   // Constructeur
   Menu() {
     _selectedOption = 0;
@@ -18,6 +23,8 @@ class Menu {
     _pacmanX = -50;
     _animationFrame = 0;
     _showingInstructions = false;
+    _selectingDifficulty = false;
+    _selectedDifficulty = 1; // MEDIUM par défaut
   }
   
   // Mise à jour du menu
@@ -40,6 +47,8 @@ class Menu {
     
     if (_showingInstructions) {
       drawInstructions();
+    } else if (_selectingDifficulty) {
+      drawDifficultySelection();
     } else {
       drawMainMenu();
     }
@@ -91,6 +100,133 @@ class Menu {
   
   // Affiche les instructions
   void drawInstructions() {
+    // Titre
+    fill(#FFFF00);
+    textAlign(CENTER);
+    textSize(48);
+    text("INSTRUCTIONS", width/2, 80);
+    
+    // Instructions de jeu
+    fill(#FFFFFF);
+    textSize(24);
+    int y = 150;
+    int spacing = 40;
+    
+    text("Contrôles :", width/2, y);
+    y += spacing;
+    
+    textSize(20);
+    text("ZQSD ou FLÈCHES : Déplacer Pac-Man", width/2, y);
+    y += spacing;
+    text("ESC : Pause", width/2, y);
+    y += spacing * 1.5;
+    
+    textSize(24);
+    text("Objectif :", width/2, y);
+    y += spacing;
+    
+    textSize(20);
+    text("Manger toutes les gommes sans te faire attraper !", width/2, y);
+    y += spacing * 1.5;
+    
+    textSize(24);
+    text("Fantômes :", width/2, y);
+    y += spacing;
+    
+    textSize(18);
+    fill(#FF0000);
+    text("● BLINKY (rouge) : Te poursuit directement", width/2, y);
+    y += spacing;
+    fill(#FFB8FF);
+    text("● PINKY (rose) : Anticipe tes mouvements", width/2, y);
+    y += spacing;
+    fill(#00FFFF);
+    text("● INKY (cyan) : Alterne entre poursuite et patrouille", width/2, y);
+    y += spacing;
+    fill(#FFB852);
+    text("● CLYDE (orange) : Aléatoire et fuit si trop proche", width/2, y);
+    y += spacing * 1.5;
+    
+    fill(#FFFFFF);
+    textSize(20);
+    text("🔵 Super-gomme : Mange les fantômes pendant quelques secondes !", width/2, y);
+    y += spacing;
+    text("🍒 Fruits : Bonus de points !", width/2, y);
+    
+    // Retour
+    fill(#888888);
+    textSize(18);
+    text("Appuyez sur ECHAP pour revenir", width/2, height - 50);
+  }
+  
+  // Affiche l'écran de sélection de difficulté
+  void drawDifficultySelection() {
+    // Titre
+    fill(#FFFF00);
+    textAlign(CENTER);
+    textSize(56);
+    text("CHOISISSEZ LA DIFFICULTÉ", width/2, 120);
+    
+    // Options de difficulté
+    int startY = 300;
+    int spacing = 100;
+    
+    for (int i = 0; i < _difficultyOptions.length; i++) {
+      int y = startY + i * spacing;
+      
+      // Couleur selon la difficulté
+      color optionColor;
+      if (i == 0) optionColor = #00FF00;      // Vert pour FACILE
+      else if (i == 1) optionColor = #FFFF00; // Jaune pour MOYEN
+      else optionColor = #FF0000;             // Rouge pour DIFFICILE
+      
+      // Highlight de l'option sélectionnée
+      if (i == _selectedDifficulty) {
+        // Rectangle de sélection
+        float pulseSize = sin(frameCount * 0.1) * 10;
+        fill(optionColor, 50);
+        rectMode(CENTER);
+        rect(width/2, y - 10, 400 + pulseSize, 70, 10);
+        rectMode(CORNER);
+        
+        fill(optionColor);
+        textSize(48);
+        // Flèches
+        text("▶", width/2 - 220, y);
+        text("◀", width/2 + 220, y);
+      } else {
+        fill(optionColor, 150);
+        textSize(36);
+      }
+      
+      text(_difficultyOptions[i], width/2, y);
+    }
+    
+    // Description de la difficulté
+    fill(#FFFFFF);
+    textSize(20);
+    int descY = startY + _difficultyOptions.length * spacing + 50;
+    
+    switch(_selectedDifficulty) {
+      case 0: // NIVEAU CHÈVRE
+        text("🐐 5 vies | Fantômes très lents | Super-gomme infinie", width/2, descY);
+        break;
+      case 1: // MOYEN
+        text("🟡 3 vies | Fantômes rapides | Durée réduite", width/2, descY);
+        break;
+      case 2: // DIFFICILE
+        text("🔴 2 vies | Fantômes EXTRÊMMEMENT rapides | Mort instantanée", width/2, descY);
+        break;
+    }
+    
+    // Instructions
+    fill(#888888);
+    textSize(18);
+    text("↑↓ : Changer  |  ENTRÉE : Commencer  |  ECHAP : Retour", width/2, height - 50);
+  }
+  
+  // Affiche les instructions (ancienne méthode conservée mais renommée)
+  void drawInstructionsOld() {
     // Titre
     fill(#FFFF00);
     textAlign(CENTER);
@@ -178,6 +314,26 @@ class Menu {
         _showingInstructions = false;
         key = 0; // Empêcher la fermeture de l'application
       }
+    } else if (_selectingDifficulty) {
+      // Navigation dans la sélection de difficulté
+      if (k == CODED) {
+        if (keyCode == UP) {
+          _selectedDifficulty--;
+          if (_selectedDifficulty < 0) {
+            _selectedDifficulty = _difficultyOptions.length - 1;
+          }
+        } else if (keyCode == DOWN) {
+          _selectedDifficulty++;
+          if (_selectedDifficulty >= _difficultyOptions.length) {
+            _selectedDifficulty = 0;
+          }
+        }
+      } else if (k == ESC) {
+        // Retour au menu principal
+        _selectingDifficulty = false;
+        key = 0;
+      }
+      // ENTRÉE sera gérée dans pacman.pde
     } else {
       // Dans le menu principal
       if (k == CODED) {
@@ -203,7 +359,7 @@ class Menu {
   void executeOption() {
     switch(_selectedOption) {
       case 0: // JOUER
-        // Sera géré dans pacman.pde pour démarrer le jeu
+        _selectingDifficulty = true;
         break;
       case 1: // INSTRUCTIONS
         _showingInstructions = true;
@@ -218,6 +374,7 @@ class Menu {
   void reset() {
     _selectedOption = 0;
     _showingInstructions = false;
+    _selectingDifficulty = false;
     _pacmanX = -50;
   }
   
@@ -228,5 +385,13 @@ class Menu {
   
   boolean isShowingInstructions() {
     return _showingInstructions;
+  }
+  
+  boolean isSelectingDifficulty() {
+    return _selectingDifficulty;
+  }
+  
+  int getSelectedDifficulty() {
+    return _selectedDifficulty;
   }
 }

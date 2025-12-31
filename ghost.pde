@@ -452,18 +452,18 @@ class Ghost {
   }
   
   // Active le mode effrayé (quand Pac-Man mange une super-gomme)
-  void scare() {
+  void scare(int duration, float scaredSpeed, float scaredSpeedClyde) {
     // Ne pas effrayer les fantômes en mode yeux ou non-released
     if (_eyes || !_released) return;
     
     _scared = true;
-    _scaredTimer = GHOST_SCARED_TIME;
+    _scaredTimer = duration;
     
     // Clyde (orange) est un peu plus rapide que les autres en mode effrayé
     if (_name.equals("Clyde")) {
-      _speed = GHOST_SCARED_SPEED_CLYDE;
+      _speed = scaredSpeedClyde;
     } else {
-      _speed = GHOST_SCARED_SPEED;
+      _speed = scaredSpeed;
     }
   }
   

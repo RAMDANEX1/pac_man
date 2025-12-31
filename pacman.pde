@@ -39,14 +39,18 @@ void draw() {
 
 void keyPressed() {
   if (inMenu) {
+    // Vérifier l'état AVANT de gérer la touche
+    boolean wasSelectingDifficulty = menu.isSelectingDifficulty();
+    
     menu.handleKey(key);
     
-    // Si l'utilisateur a sélectionné "JOUER"
+    // Si l'utilisateur a sélectionné une difficulté (et était déjà dans cet écran)
     if (key == '\n' || key == '\r') {
-      if (menu.getSelectedOption() == 0 && !menu.isShowingInstructions()) {
-        // Démarrer le jeu
-        println("=== DÉMARRAGE DU JEU ===");
-        game = new Game();
+      if (wasSelectingDifficulty && menu.isSelectingDifficulty()) {
+        // Démarrer le jeu avec la difficulté sélectionnée
+        int difficulty = menu.getSelectedDifficulty();
+        println("=== DÉMARRAGE DU JEU (Difficulté: " + difficulty + ") ===");
+        game = new Game(difficulty);
         inMenu = false;
         println("=== JEU INITIALISÉ ===");
       }
@@ -64,6 +68,7 @@ void keyPressed() {
           inMenu = true;
           menu.reset();
           game = null; // Libérer le jeu
+          return; // Ne pas appeler handleKey sur null
         }
         // Si option 0 (REPRENDRE), c'est géré dans game.handleKey
       }

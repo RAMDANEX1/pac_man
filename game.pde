@@ -25,13 +25,19 @@ class Game
   int _gameOverMenuOption;   // Option sélectionnée (0=Rejouer, 1=Menu, 2=Quitter)
   boolean _returnToMenu;     // Flag pour retourner au menu principal
   
+  // Difficulté
+  int _difficulty;           // 0=EASY, 1=MEDIUM, 2=HARD
+  DifficultySettings _difficultySettings;
+  
   // Constructeur : initialise le jeu
-  Game() {
+  Game(int difficulty) {
     _board = null;
     _hero = null;
     _ghosts = new Ghost[GHOST_COUNT];
     _score = 0;
-    _lives = INITIAL_LIVES;
+    _difficulty = difficulty;
+    _difficultySettings = getDifficultySettings(difficulty);
+    _lives = _difficultySettings.lives;
     _gameOver = false;
     _levelComplete = false;
     _paused = false;
@@ -93,18 +99,25 @@ class Game
     // Les positions V centrales sont x=9, 10, 11, 12, 13
     int ghostBoxY = 10;  // Ligne avec les V
     
+    // Utiliser les délais de sortie selon la difficulté
+    int baseDelay = _difficultySettings.releaseDelay;
+    
     // Configuration selon les spécifications :
     // Blinky (rouge) - EN DEHORS de la cage, au-dessus (y=8)
     _ghosts[0] = new Ghost(_board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
+    _ghosts[0]._speed = _difficultySettings.ghostSpeed;
     
     // Pinky (rose) - AU MILIEU de la cage, sort en PREMIER (délai court)
-    _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", 60);
+    _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", (int)(baseDelay * 0.5));
+    _ghosts[1]._speed = _difficultySettings.ghostSpeed;
     
     // Inky (bleu) - À GAUCHE dans la cage, sort en DEUXIÈME (délai moyen)
-    _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", 120);
+    _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", baseDelay);
+    _ghosts[2]._speed = _difficultySettings.ghostSpeed;
     
     // Clyde (orange) - À DROITE dans la cage, sort en TROISIÈME (délai long)
-    _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", 180);
+    _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", (int)(baseDelay * 1.5));
+    _ghosts[3]._speed = _difficultySettings.ghostSpeed;
   }
   
   // Mise à jour du jeu (appelée à chaque frame)
@@ -160,8 +173,8 @@ class Game
       }
     }
     
-    // Vérifier si le joueur a atteint 10 000 points pour gagner une vie
-    if (_score >= 10000 && !_extraLifeGiven) {
+    // Vérifier si le joueur a atteint le seuil pour gagner une vie (selon la difficulté)
+    if (_score >= _difficultySettings.extraLifeScore && !_extraLifeGiven) {
       _lives++;
       _extraLifeGiven = true;
       println("Vie bonus gagnée ! Score: " + _score);
@@ -191,11 +204,13 @@ class Game
         _score += SCORE_SUPER_DOT;
         _dotsEaten++;
         
-        // Effrayer tous les fantômes
+        // Effrayer tous les fantômes avec la durée selon la difficulté
         _ghostCombo = 0;  // Réinitialiser le combo
         for (Ghost ghost : _ghosts) {
           if (ghost != null) {
-            ghost.scare();
+            ghost.scare(_difficultySettings.scaredDuration, 
+                       _difficultySettings.ghostScaredSpeed, 
+                       _difficultySettings.ghostScaredSpeedClyde);
           }
         }
       }
@@ -572,9 +587,9 @@ class Game
       }
     } else if (k == '\n' || k == '\r') {  // Touche Entrée
       if (_gameOverMenuOption == 0) {
-        // Rejouer
+        // Rejouer avec la même difficulté
         _score = 0;
-        _lives = INITIAL_LIVES;
+        _lives = _difficultySettings.lives;
         _gameOver = false;
         _gameOverTimer = 0;
         _gameOverMenuOption = 0;

@@ -45,6 +45,68 @@ final color COLOR_GHOST_EYES = #FFFFFF;   // Blanc pour les yeux
 // ===== GAMEPLAY =====
 final int INITIAL_LIVES = 3;              // Nombre de vies au départ
 
+// ===== NIVEAUX DE DIFFICULTÉ =====
+final int DIFFICULTY_EASY = 0;
+final int DIFFICULTY_MEDIUM = 1;
+final int DIFFICULTY_HARD = 2;
+
+// Classe pour stocker les paramètres de difficulté
+class DifficultySettings {
+  int lives;
+  float ghostSpeed;
+  float ghostScaredSpeed;
+  float ghostScaredSpeedClyde;
+  int scaredDuration;
+  int releaseDelay;
+  int extraLifeScore;
+  
+  DifficultySettings(int l, float gs, float gss, float gssc, int sd, int rd, int els) {
+    lives = l;
+    ghostSpeed = gs;
+    ghostScaredSpeed = gss;
+    ghostScaredSpeedClyde = gssc;
+    scaredDuration = sd;
+    releaseDelay = rd;
+    extraLifeScore = els;
+  }
+}
+
+// Paramètres pour chaque niveau
+DifficultySettings getDifficultySettings(int difficulty) {
+  switch(difficulty) {
+    case 0: // EASY (Niveau Chèvre)
+      return new DifficultySettings(
+        5,      // 5 vies
+        1.5,    // Fantômes très lents
+        2.0,    // Fantômes effrayés très lents
+        2.2,    // Clyde effrayé très lent
+        500,    // Super-gomme dure très longtemps
+        240,    // Sortie de cage très lente
+        3000    // Vie bonus à 3000 points
+      );
+    case 2: // HARD
+      return new DifficultySettings(
+        2,      // 2 vies seulement
+        4.2,    // Fantômes TRÈS rapides (plus que Pac-Man!)
+        4.5,    // Fantômes effrayés très rapides
+        4.8,    // Clyde effrayé extrêmement rapide
+        150,    // Super-gomme dure très peu de temps
+        20,     // Sortie de cage quasi instantanée
+        20000   // Vie bonus à 20000 points
+      );
+    default: // MEDIUM (1)
+      return new DifficultySettings(
+        3,      // 3 vies
+        3.0,    // Vitesse augmentée
+        3.5,    // Vitesse effrayé augmentée
+        3.8,    // Clyde effrayé rapide
+        250,    // Durée réduite
+        90,     // Sortie plus rapide
+        10000   // Vie bonus à 10000 points
+      );
+  }
+}
+
 // ===== BONUS =====
 final int BONUS_SPAWN_TIME = 600;         // Apparition bonus (10 secondes à 60fps)
 final int BONUS_DURATION = 300;           // Durée bonus à l'écran
