@@ -12,6 +12,7 @@ class Ghost {
   // Déplacement
   PVector _direction;
   float _speed;
+  float _normalSpeed;  // Vitesse normale (vitesse de difficulté)
   boolean _moving;
   
   boolean _scared;
@@ -46,6 +47,7 @@ class Ghost {
     float dirX = random(1) > 0.5 ? 1 : -1;
     _direction = new PVector(dirX, 0);
     _speed = GHOST_SPEED;
+    _normalSpeed = GHOST_SPEED;  // Mémoriser la vitesse normale
     _moving = true;  // Commencer en mouvement
     
     // États initiaux
@@ -84,7 +86,8 @@ class Ghost {
       _scaredTimer--;
       if (_scaredTimer <= 0) {
         _scared = false;
-        _speed = GHOST_SPEED;
+        // Restaurer la vitesse normale (vitesse de difficulté)
+        _speed = _normalSpeed;
       }
     }
     
@@ -114,7 +117,7 @@ class Ghost {
       _released = false;
       _releaseTimer = 180; // Attendre 3 secondes avant de ressortir
       _direction = new PVector(0, -1); // Direction vers le haut pour sortir
-      _speed = GHOST_SPEED;
+      _speed = _normalSpeed;  // Restaurer la vitesse normale (vitesse de difficulté)
       
       // DEBUG - Effacer la trajectoire lors de la régénération
       _pathPoints.clear();
@@ -474,7 +477,7 @@ class Ghost {
     _scared = false;
     _scaredTimer = 0;
     _eyes = false;
-    _speed = GHOST_SPEED;
+    // NE PAS réinitialiser _speed ici pour garder la vitesse de difficulté
     
     // Si c'était Blinky (déjà released au départ), rester released
     // Les autres retournent dans la cage

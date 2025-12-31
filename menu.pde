@@ -63,13 +63,13 @@ class Menu {
   // Affiche le menu principal
   void drawMainMenu() {
     // Titre principal
-    fill(#FFFF00);
+    fill(255, 255, 0);
     textAlign(CENTER);
     textSize(72);
     text("PAC-MAN", width/2, 150);
     
     // Sous-titre
-    fill(#FFB897);
+    fill(255, 184, 151);
     textSize(24);
     text("Prêt à manger des gommes ?", width/2, 200);
     
@@ -85,13 +85,19 @@ class Menu {
       
       // Highlight de l'option sélectionnée
       if (i == _selectedOption) {
-        fill(#FFFF00);
+        // Petit rectangle simple
+        fill(255, 255, 0, 40);
+        rectMode(CENTER);
+        rect(width/2, y - 12, 300, 50, 8);
+        rectMode(CORNER);
+        
+        fill(255, 255, 0);
         textSize(40);
-        // Flèche indicatrice
-        text("►", width/2 - 150, y);
-        text("◄", width/2 + 150, y);
+        // Flèches indicatrices
+        text(">", width/2 - 140, y);
+        text("<", width/2 + 140, y);
       } else {
-        fill(#FFFFFF);
+        fill(255, 255, 255);
         textSize(32);
       }
       
@@ -99,7 +105,7 @@ class Menu {
     }
     
     // Instructions en bas
-    fill(#888888);
+    fill(136, 136, 136);
     textSize(18);
     text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner", width/2, height - 50);
   }
@@ -107,60 +113,78 @@ class Menu {
   // Affiche les instructions
   void drawInstructions() {
     // Titre
-    fill(#FFFF00);
+    fill(255, 255, 0);
     textAlign(CENTER);
     textSize(48);
     text("INSTRUCTIONS", width/2, 80);
     
-    // Instructions de jeu
-    fill(#FFFFFF);
-    textSize(24);
-    int y = 150;
-    int spacing = 40;
+    // Ligne simple
+    stroke(255, 255, 0);
+    strokeWeight(2);
+    line(width/2 - 120, 95, width/2 + 120, 95);
+    noStroke();
     
-    text("Contrôles :", width/2, y);
+    int y = 150;
+    int spacing = 35;
+    
+    // Section Contrôles
+    fill(255, 255, 0);
+    textSize(26);
+    text("🎮 CONTRÔLES", width/2, y);
     y += spacing;
     
+    fill(255, 255, 255);
     textSize(20);
-    text("ZQSD ou FLÈCHES : Déplacer Pac-Man", width/2, y);
+    text("⬆ ⬇ ⬅ ➡  ou  Z Q S D  : Déplacer Pac-Man", width/2, y);
     y += spacing;
     text("ESC : Pause", width/2, y);
-    y += spacing * 1.5;
+    y += spacing * 1.8;
     
-    textSize(24);
-    text("Objectif :", width/2, y);
+    // Section Objectif
+    fill(0, 255, 0);
+    textSize(26);
+    text("🎯 OBJECTIF", width/2, y);
     y += spacing;
     
+    fill(255, 255, 255);
     textSize(20);
     text("Manger toutes les gommes sans te faire attraper !", width/2, y);
-    y += spacing * 1.5;
+    y += spacing * 1.8;
     
-    textSize(24);
-    text("Fantômes :", width/2, y);
+    // Section Fantômes
+    fill(255, 102, 102);
+    textSize(26);
+    text("👻 FANTÔMES", width/2, y);
     y += spacing;
     
-    textSize(18);
-    fill(#FF0000);
+    textSize(19);
+    fill(255, 0, 0);
     text("● BLINKY (rouge) : Te poursuit directement", width/2, y);
     y += spacing;
-    fill(#FFB8FF);
+    fill(255, 184, 255);
     text("● PINKY (rose) : Anticipe tes mouvements", width/2, y);
     y += spacing;
-    fill(#00FFFF);
+    fill(0, 255, 255);
     text("● INKY (cyan) : Alterne entre poursuite et patrouille", width/2, y);
     y += spacing;
-    fill(#FFB852);
+    fill(255, 184, 82);
     text("● CLYDE (orange) : Aléatoire et fuit si trop proche", width/2, y);
-    y += spacing * 1.5;
+    y += spacing * 1.8;
     
-    fill(#FFFFFF);
-    textSize(20);
+    // Section Bonus
+    fill(255, 255, 0);
+    textSize(26);
+    text("⭐ BONUS", width/2, y);
+    y += spacing;
+    
+    fill(255, 255, 255);
+    textSize(19);
     text("🔵 Super-gomme : Mange les fantômes pendant quelques secondes !", width/2, y);
     y += spacing;
-    text("🍒 Fruits : Bonus de points !", width/2, y);
+    text("🍒 Fruits : Bonus de points et vies !", width/2, y);
     
-    // Retour
-    fill(#888888);
+    // Instructions de retour
+    fill(136, 136, 136);
     textSize(18);
     text("Appuyez sur ECHAP pour revenir", width/2, height - 50);
   }
@@ -168,7 +192,7 @@ class Menu {
   // Affiche l'écran de sélection de difficulté
   void drawDifficultySelection() {
     // Titre
-    fill(#FFFF00);
+    fill(255, 255, 0);
     textAlign(CENTER);
     textSize(56);
     text("CHOISISSEZ LA DIFFICULTÉ", width/2, 120);
@@ -182,9 +206,9 @@ class Menu {
       
       // Couleur selon la difficulté
       color optionColor;
-      if (i == 0) optionColor = #00FF00;      // Vert pour FACILE
-      else if (i == 1) optionColor = #FFFF00; // Jaune pour MOYEN
-      else optionColor = #FF0000;             // Rouge pour DIFFICILE
+      if (i == 0) optionColor = color(0, 255, 0);      // Vert pour FACILE
+      else if (i == 1) optionColor = color(255, 255, 0); // Jaune pour MOYEN
+      else optionColor = color(255, 0, 0);             // Rouge pour DIFFICILE
       
       // Highlight de l'option sélectionnée
       if (i == _selectedDifficulty) {
@@ -209,7 +233,7 @@ class Menu {
     }
     
     // Description de la difficulté
-    fill(#FFFFFF);
+    fill(255, 255, 255);
     textSize(20);
     int descY = startY + _difficultyOptions.length * spacing + 50;
     
@@ -226,7 +250,7 @@ class Menu {
     }
     
     // Instructions
-    fill(#888888);
+    fill(136, 136, 136);
     textSize(18);
     text("↑↓ : Changer  |  ENTRÉE : Commencer  |  ECHAP : Retour", width/2, height - 50);
   }
@@ -234,53 +258,53 @@ class Menu {
   // Affiche les instructions (ancienne méthode conservée mais renommée)
   void drawInstructionsOld() {
     // Titre
-    fill(#FFFF00);
+    fill(255, 255, 0);
     textAlign(CENTER);
     textSize(48);
     text("INSTRUCTIONS", width/2, 80);
     
     // Instructions de jeu
     textAlign(LEFT);
-    fill(#FFFFFF);
+    fill(255, 255, 255);
     textSize(24);
     int startY = 150;
     int lineHeight = 40;
     
     text("🎮 CONTRÔLES :", 100, startY);
-    fill(#FFB897);
+    fill(255, 184, 151);
     textSize(20);
     text("• Flèches directionnelles ou ZQSD pour se déplacer", 120, startY + lineHeight);
     text("• R pour recommencer après Game Over", 120, startY + lineHeight * 2);
     
-    fill(#FFFFFF);
+    fill(255, 255, 255);
     textSize(24);
     text("🎯 OBJECTIF :", 100, startY + lineHeight * 4);
-    fill(#FFB897);
+    fill(255, 184, 151);
     textSize(20);
     text("• Manger toutes les gommes pour finir le niveau", 120, startY + lineHeight * 5);
     text("• Éviter les fantômes (ils vous tuent !)", 120, startY + lineHeight * 6);
     
-    fill(#FFFFFF);
+    fill(255, 255, 255);
     textSize(24);
     text("👻 FANTÔMES :", 100, startY + lineHeight * 8);
-    fill(#FFB897);
+    fill(255, 184, 151);
     textSize(20);
     text("• 🔴 Blinky : Vous suit directement", 120, startY + lineHeight * 9);
     text("• 🌸 Pinky : Anticipe votre chemin", 120, startY + lineHeight * 10);
     text("• 🔵 Inky : Comportement imprévisible", 120, startY + lineHeight * 11);
     text("• 🟠 Clyde : Alterne entre vous suivre et fuir", 120, startY + lineHeight * 12);
     
-    fill(#FFFFFF);
+    fill(255, 255, 255);
     textSize(24);
     text("⭐ BONUS :", 100, startY + lineHeight * 14);
-    fill(#FFB897);
+    fill(255, 184, 151);
     textSize(20);
     text("• Petites gommes (o) : 10 points", 120, startY + lineHeight * 15);
     text("• Super-gommes (O) : 50 points + fantômes mangeable", 120, startY + lineHeight * 16);
     text("• Fantôme mangé : 200 points", 120, startY + lineHeight * 17);
     
     // Retour
-    fill(#FFFF00);
+    fill(255, 255, 0);
     textAlign(CENTER);
     textSize(22);
     text("Appuyez sur ÉCHAP pour retourner au menu", width/2, height - 50);
@@ -291,7 +315,7 @@ class Menu {
     pushMatrix();
     translate(_pacmanX, 280);
     
-    fill(#FFFF00);
+    fill(255, 255, 0);
     noStroke();
     
     // Animation de la bouche
@@ -306,7 +330,7 @@ class Menu {
     for (int i = 0; i < 5; i++) {
       float dotX = _pacmanX + 100 + i * 40;
       if (dotX > 0 && dotX < width) {
-        fill(#FFB897);
+        fill(255, 184, 151);
         ellipse(dotX, 280, 12, 12);
       }
     }

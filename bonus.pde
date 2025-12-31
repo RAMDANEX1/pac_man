@@ -34,27 +34,29 @@ class Bonus {
     switch(type) {
       case "cherry":
         _score = 100;
-        _color = #FF0000;  // Rouge
+        _color = color(255, 0, 0);  // Rouge
         break;
       case "strawberry":
         _score = 300;
-        _color = #FF69B4;  // Rose
+        _color = color(255, 105, 180);  // Rose
         break;
       case "orange":
         _score = 500;
-        _color = #FFA500;  // Orange
+        _color = color(255, 165, 0);  // Orange
         break;
       case "apple":
         _score = 700;
-        _color = #FF0000;  // Rouge foncé
+        _color = color(255, 0, 0);  // Rouge foncé
         break;
       case "melon":
         _score = 1000;
-        _color = #00FF00;  // Vert
-        break;
-      default:
+        _color = color(0, 255, 0);  // Vert
+        break;      case "diamond":
+        _score = 3000;
+        _color = color(0, 255, 255);  // Cyan brillant
+        break;      default:
         _score = 500;
-        _color = #FFFF00;  // Jaune par défaut
+        _color = color(255, 255, 0);  // Jaune par défaut
         break;
     }
     
@@ -89,6 +91,10 @@ class Bonus {
         newType = "melon";      // 190 gommes -> melon (1000 pts)
         shouldSpawn = true;
         _spawnCount = 5;
+      } else if (dotsEaten >= 220 && _spawnCount == 5) {
+        newType = "diamond";    // 220 gommes -> diamant (3000 pts)
+        shouldSpawn = true;
+        _spawnCount = 6;
       }
       
       if (shouldSpawn && newType != null) {
@@ -123,23 +129,27 @@ class Bonus {
     switch(newType) {
       case "cherry":
         _score = 100;
-        _color = #FF0000;  // Rouge
+        _color = color(255, 0, 0);  // Rouge
         break;
       case "strawberry":
         _score = 300;
-        _color = #FF69B4;  // Rose
+        _color = color(255, 105, 180);  // Rose
         break;
       case "orange":
         _score = 500;
-        _color = #FFA500;  // Orange
+        _color = color(255, 165, 0);  // Orange
         break;
       case "apple":
         _score = 700;
-        _color = #FF0000;  // Rouge foncé
+        _color = color(255, 0, 0);  // Rouge foncé
         break;
       case "melon":
         _score = 1000;
-        _color = #00FF00;  // Vert
+        _color = color(0, 255, 0);  // Vert
+        break;
+      case "diamond":
+        _score = 3000;
+        _color = color(0, 255, 255);  // Cyan brillant
         break;
     }
     
@@ -184,6 +194,8 @@ class Bonus {
       drawApple(pulse);
     } else if (_type.equals("melon")) {
       drawMelon(pulse);
+    } else if (_type.equals("diamond")) {
+      drawDiamond(pulse);
     } else {
       // Bonus générique
       fill(_color);
@@ -199,12 +211,12 @@ class Bonus {
     noStroke();
     
     // Cerises
-    fill(#FF0000);
+    fill(255, 0, 0);
     ellipse(-8 * scale, 0, 15 * scale, 15 * scale);
     ellipse(8 * scale, 0, 15 * scale, 15 * scale);
     
     // Tiges
-    stroke(#8B4513);
+    stroke(139, 69, 19);
     strokeWeight(2);
     line(-8 * scale, -7 * scale, 0, -15 * scale);
     line(8 * scale, -7 * scale, 0, -15 * scale);
@@ -215,7 +227,7 @@ class Bonus {
     noStroke();
     
     // Corps de la fraise
-    fill(#FF1744);
+    fill(255, 23, 68);
     beginShape();
     vertex(0, -12 * scale);
     vertex(10 * scale, 0);
@@ -226,11 +238,11 @@ class Bonus {
     endShape(CLOSE);
     
     // Feuilles
-    fill(#00FF00);
+    fill(0, 255, 0);
     triangle(-8 * scale, -10 * scale, 0, -14 * scale, 8 * scale, -10 * scale);
     
     // Points
-    fill(#FFFF00);
+    fill(255, 255, 0);
     for (int i = 0; i < 6; i++) {
       float angle = i * PI / 3;
       ellipse(cos(angle) * 5 * scale, sin(angle) * 5 * scale, 2 * scale, 2 * scale);
@@ -242,11 +254,11 @@ class Bonus {
     noStroke();
     
     // Corps de l'orange
-    fill(#FFA500);
+    fill(255, 165, 0);
     ellipse(0, 0, 25 * scale, 25 * scale);
     
     // Texture
-    stroke(#FF8C00);
+    stroke(255, 140, 0);
     strokeWeight(1);
     for (int i = 0; i < 8; i++) {
       float angle = i * TWO_PI / 8;
@@ -255,7 +267,7 @@ class Bonus {
     
     // Feuille
     noStroke();
-    fill(#00FF00);
+    fill(0, 255, 0);
     ellipse(8 * scale, -10 * scale, 6 * scale, 4 * scale);
   }
   
@@ -264,19 +276,19 @@ class Bonus {
     noStroke();
     
     // Corps de la pomme
-    fill(#DC143C);
+    fill(220, 20, 60);
     ellipse(0, 2 * scale, 22 * scale, 20 * scale);
     ellipse(-5 * scale, -5 * scale, 15 * scale, 18 * scale);
     ellipse(5 * scale, -5 * scale, 15 * scale, 18 * scale);
     
     // Tige
-    stroke(#8B4513);
+    stroke(139, 69, 19);
     strokeWeight(2);
     line(0, -10 * scale, 0, -15 * scale);
     
     // Feuille
     noStroke();
-    fill(#00FF00);
+    fill(0, 255, 0);
     ellipse(5 * scale, -14 * scale, 8 * scale, 5 * scale);
   }
   
@@ -285,18 +297,18 @@ class Bonus {
     noStroke();
     
     // Corps du melon
-    fill(#90EE90);
+    fill(144, 238, 144);
     ellipse(0, 0, 28 * scale, 25 * scale);
     
     // Rayures
-    stroke(#228B22);
+    stroke(34, 139, 34);
     strokeWeight(2);
     for (int i = -2; i <= 2; i++) {
       line(i * 6 * scale, -12 * scale, i * 6 * scale, 12 * scale);
     }
     
     // Tige
-    stroke(#8B4513);
+    stroke(139, 69, 19);
     strokeWeight(2);
     line(0, -12 * scale, 0, -16 * scale);
   }
@@ -349,5 +361,49 @@ class Bonus {
   
   String getType() {
     return _type;
+  }
+  
+  // Dessine un diamant brillant
+  void drawDiamond(float scale) {
+    noStroke();
+    
+    // Corps du diamant - forme de losange
+    fill(0, 255, 255);  // Cyan brillant
+    beginShape();
+    vertex(0, -15 * scale);      // Haut
+    vertex(10 * scale, 0);       // Droite
+    vertex(0, 15 * scale);       // Bas
+    vertex(-10 * scale, 0);      // Gauche
+    endShape(CLOSE);
+    
+    // Facettes intérieures pour effet brillant
+    fill(255, 255, 255, 150);  // Blanc semi-transparent
+    beginShape();
+    vertex(0, -15 * scale);
+    vertex(6 * scale, 0);
+    vertex(0, 8 * scale);
+    vertex(-6 * scale, 0);
+    endShape(CLOSE);
+    
+    // Éclat central
+    fill(255, 255, 255, 200);
+    ellipse(-3 * scale, -5 * scale, 5 * scale, 5 * scale);
+    
+    // Contour du diamant
+    noFill();
+    stroke(255, 255, 255, 180);
+    strokeWeight(2);
+    beginShape();
+    vertex(0, -15 * scale);
+    vertex(10 * scale, 0);
+    vertex(0, 15 * scale);
+    vertex(-10 * scale, 0);
+    endShape(CLOSE);
+    
+    // Lignes de facettes
+    stroke(255, 255, 255, 120);
+    strokeWeight(1);
+    line(0, -15 * scale, 0, 15 * scale);  // Verticale
+    line(-10 * scale, 0, 10 * scale, 0);  // Horizontale
   }
 }

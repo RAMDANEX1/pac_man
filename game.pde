@@ -105,18 +105,22 @@ class Game
     // Blinky (rouge)
     _ghosts[0] = new Ghost(_board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
     _ghosts[0]._speed = _diffSettings.ghostSpeed;
+    _ghosts[0]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Pinky (rose)
     _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", (int)(baseDelay * 0.5));
     _ghosts[1]._speed = _diffSettings.ghostSpeed;
+    _ghosts[1]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Inky (bleu)  
     _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", baseDelay);
     _ghosts[2]._speed = _diffSettings.ghostSpeed;
+    _ghosts[2]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Clyde (orange)
     _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", (int)(baseDelay * 1.5));
     _ghosts[3]._speed = _diffSettings.ghostSpeed;
+    _ghosts[3]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
   }
   
   void update() {
@@ -124,8 +128,9 @@ class Game
     
     if (_gameOver) {
       _gameOverTimer++;
-      // Vérifier une seule fois si c'est un high score
-      if (_gameOverTimer == 60 && _highScores.isHighScore(_score) && !_enteringName) {
+      // Vérifier si c'est un high score et si on n'est pas déjà en train d'entrer le nom
+      if (_gameOverTimer == 60 && !_enteringName) {
+        // Toujours demander le nom (game over ou niveau terminé)
         _enteringName = true;
         _playerName = "";
       }
@@ -255,6 +260,7 @@ class Game
     
     if (_lives <= 0) {
       _gameOver = true;
+      _gameOverTimer = 0;  // Réinitialiser le timer
     } else {
       // Réinitialiser les positions
       resetPositions();
@@ -570,13 +576,13 @@ class Game
       
       // Highlight de l'option sélectionnée
       if (i == _pauseMenuOption) {
-        fill(#FFFF00);
+        fill(255, 255, 0);
         textSize(40);
         // Flèches indicatrices
         text("►", width/2 - 180, y);
         text("◄", width/2 + 180, y);
       } else {
-        fill(#FFFFFF);
+        fill(255, 255, 255);
         textSize(32);
       }
       
@@ -584,7 +590,7 @@ class Game
     }
     
     // Instructions en bas
-    fill(#888888);
+    fill(136, 136, 136);
     textSize(18);
     text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner", width/2, height - 50);
   }

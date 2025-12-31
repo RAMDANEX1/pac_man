@@ -11,13 +11,13 @@ final int SCORE_SUPER_DOT = 50;     // Points pour une super-gomme
 final int SCORE_GHOST = 200;        // Points pour manger un fantôme
 
 // Couleurs
-final color COLOR_WALL = #2121DE;         // Bleu foncé pour les murs
-final color COLOR_BG = #000000;           // Fond noir
-final color COLOR_DOT = #FFB897;          // Beige pour les gommes
-final color COLOR_SUPER_DOT = #FFA500;    // Orange pour super-gommes
-final color COLOR_EMPTY = #000000;        // Noir pour cases vides
-final color COLOR_TEXT = #FFFFFF;         // Blanc pour le texte
-final color COLOR_PACMAN = #FFFF00;       // Jaune pour Pac-Man
+final color COLOR_WALL = color(33, 33, 222);         // Bleu foncé pour les murs
+final color COLOR_BG = color(0, 0, 0);               // Fond noir
+final color COLOR_DOT = color(255, 184, 151);        // Beige pour les gommes
+final color COLOR_SUPER_DOT = color(255, 165, 0);    // Orange pour super-gommes
+final color COLOR_EMPTY = color(0, 0, 0);            // Noir pour cases vides
+final color COLOR_TEXT = color(255, 255, 255);       // Blanc pour le texte
+final color COLOR_PACMAN = color(255, 255, 0);       // Jaune pour Pac-Man
 
 // Pac-Man
 final float PACMAN_SIZE = 30;             // Taille de Pac-Man
@@ -35,12 +35,12 @@ final int GHOST_SCARED_TIME = 300;        // Durée de l'effet super-gomme (fram
 final int GHOST_RELEASE_DELAY = 120;      // Délai entre sorties de fantômes
 
 // Couleurs des fantômes
-final color COLOR_GHOST_RED = #FF0000;    // Blinky (rouge)
-final color COLOR_GHOST_PINK = #FFB8FF;   // Pinky (rose)
-final color COLOR_GHOST_CYAN = #00FFFF;   // Inky (cyan)
-final color COLOR_GHOST_ORANGE = #FFB852; // Clyde (orange)
-final color COLOR_GHOST_SCARED = #0000FF; // Bleu quand effrayés
-final color COLOR_GHOST_EYES = #FFFFFF;   // Blanc pour les yeux
+final color COLOR_GHOST_RED = color(255, 0, 0);      // Blinky (rouge)
+final color COLOR_GHOST_PINK = color(255, 184, 255); // Pinky (rose)
+final color COLOR_GHOST_CYAN = color(0, 255, 255);   // Inky (cyan)
+final color COLOR_GHOST_ORANGE = color(255, 184, 82);// Clyde (orange)
+final color COLOR_GHOST_SCARED = color(0, 0, 255);   // Bleu quand effrayés
+final color COLOR_GHOST_EYES = color(255, 255, 255); // Blanc pour les yeux
 
 // Gameplay
 final int INITIAL_LIVES = 3;              // Nombre de vies au départ
