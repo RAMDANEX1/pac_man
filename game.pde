@@ -331,22 +331,33 @@ class Game
   
   // Affiche l'en-tête du jeu
   void drawHeader() {
-    fill(COLOR_TEXT);
+    fill(color(0, 100, 255)); // Bleu vif
     textAlign(CENTER);
-    textSize(32);
+    textSize(48); // Plus gros
+    // Effet gras : dessiner le texte plusieurs fois avec léger décalage
     text("PAC-MAN", width/2, 50);
+    text("PAC-MAN", width/2 + 1, 50);
+    text("PAC-MAN", width/2, 50 + 1);
+    text("PAC-MAN", width/2 + 1, 50 + 1);
   }
   
   // Affiche les informations de jeu (score, vies, gommes)
   void drawGameInfo() {
-    fill(COLOR_TEXT);
+    fill(color(0, 150, 255)); // Bleu clair
     textAlign(LEFT);
-    textSize(20);
-    text("SCORE: " + _score, BOARD_OFFSET_X, BOARD_OFFSET_Y - 30);
+    textSize(26); // Plus gros
+    // Effet gras pour SCORE
+    String scoreText = "SCORE: " + _score;
+    text(scoreText, BOARD_OFFSET_X, BOARD_OFFSET_Y - 30);
+    text(scoreText, BOARD_OFFSET_X + 1, BOARD_OFFSET_Y - 30);
+    text(scoreText, BOARD_OFFSET_X, BOARD_OFFSET_Y - 29);
     
-    // Afficher les gommes restantes
+    // Afficher les gommes restantes avec effet gras
     int dotsLeft = _totalDots - _dotsEaten;
-    text("GOMMES: " + dotsLeft, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 30);
+    String gommesText = "GOMMES: " + dotsLeft;
+    text(gommesText, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 30);
+    text(gommesText, BOARD_OFFSET_X + 451, BOARD_OFFSET_Y - 30);
+    text(gommesText, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 29);
     
     // Afficher les vies et cerises à droite de la map (style Pac-Man original)
     int rightX = BOARD_OFFSET_X + _board._nbCellsX * CELL_SIZE + 30;
@@ -430,10 +441,8 @@ class Game
       return;
     }
     
-    // Overlay semi-transparent qui s'assombrit progressivement
-    float overlayAlpha = min(_gameOverTimer * 2, 200);
-    fill(0, 0, 0, overlayAlpha);
-    rect(0, 0, width, height);
+    // Fond noir
+    background(0);
     
     // Attendre un peu avant d'afficher le texte
     if (_gameOverTimer < 30) return;
@@ -442,13 +451,13 @@ class Game
     float pulseScale = 1 + sin(_gameOverTimer * 0.1) * 0.05;
     
     pushMatrix();
-    translate(width/2, height/2 - 120);
+    translate(width/2, 150);
     scale(pulseScale);
     
     // Titre "GAME OVER" avec effet
     fill(255, 50, 50);  // Rouge
     textAlign(CENTER);
-    textSize(64);
+    textSize(72);
     text("GAME OVER", 0, 0);
     
     popMatrix();
@@ -456,42 +465,38 @@ class Game
     // Attendre encore un peu pour le reste
     if (_gameOverTimer < 60) return;
     
-    // Score final
-    fill(COLOR_TEXT);
-    textSize(32);
-    text("Score Final: " + _score, width/2, height/2 - 20);
-    
-    // Séparateur
-    stroke(255, 255, 255, 100);
-    strokeWeight(2);
-    line(width/2 - 200, height/2 + 20, width/2 + 200, height/2 + 20);
-    noStroke();
+    // Sous-titre avec score final
+    fill(255, 184, 151);
+    textSize(24);
+    text("Score Final: " + _score, width/2, 210);
     
     // Menu d'options
     String[] options = {"REJOUER", "MENU PRINCIPAL", "QUITTER"};
+    int startY = 400;
+    int spacing = 80;
     
     for (int i = 0; i < options.length; i++) {
-      float yPos = height/2 + 80 + i * 60;
+      int y = startY + i * spacing;
       
       // Surbrillance de l'option sélectionnée
       if (i == _gameOverOpt) {
-        // Rectangle de sélection avec animation
-        float pulseSize = sin(_gameOverTimer * 0.15) * 5;
-        fill(255, 255, 0, 100);
+        // Rectangle de sélection
+        fill(255, 255, 0, 40);
         rectMode(CENTER);
-        rect(width/2, yPos, 280 + pulseSize, 50, 10);
+        rect(width/2, y - 12, 300, 50, 8);
         rectMode(CORNER);
         
-        // Texte en jaune
+        // Texte en jaune avec flèches
         fill(255, 255, 0);
-        textSize(32);
+        textSize(40);
+        text(">", width/2 - 140, y);
+        text("<", width/2 + 140, y);
       } else {
-        // Texte en blanc
-        fill(200);
-        textSize(28);
+        fill(255, 255, 255);
+        textSize(32);
       }
       
-      text(options[i], width/2, yPos + 5);
+      text(options[i], width/2, y);
     }
     
     // Instructions en bas
@@ -556,19 +561,23 @@ class Game
   
   // Affiche le menu pause
   void drawPauseMenu() {
-    // Overlay semi-transparent
-    fill(0, 0, 0, 180);
-    rect(0, 0, width, height);
+    // Fond noir
+    background(0);
     
-    // Titre
-    fill(COLOR_TEXT);
+    // Titre principal
+    fill(255, 255, 0);
     textAlign(CENTER);
-    textSize(56);
-    text("PAUSE", width/2, height/2 - 100);
+    textSize(72);
+    text("PAUSE", width/2, 150);
+    
+    // Sous-titre
+    fill(255, 184, 151);
+    textSize(24);
+    text("Jeu en pause", width/2, 200);
     
     // Options du menu pause
     String[] options = {"REPRENDRE", "MENU PRINCIPAL"};
-    int startY = height/2;
+    int startY = 400;
     int spacing = 80;
     
     for (int i = 0; i < options.length; i++) {
@@ -576,11 +585,17 @@ class Game
       
       // Highlight de l'option sélectionnée
       if (i == _pauseMenuOption) {
+        // Rectangle de sélection
+        fill(255, 255, 0, 40);
+        rectMode(CENTER);
+        rect(width/2, y - 12, 300, 50, 8);
+        rectMode(CORNER);
+        
+        // Texte en jaune avec flèches
         fill(255, 255, 0);
         textSize(40);
-        // Flèches indicatrices
-        text("►", width/2 - 180, y);
-        text("◄", width/2 + 180, y);
+        text(">", width/2 - 140, y);
+        text("<", width/2 + 140, y);
       } else {
         fill(255, 255, 255);
         textSize(32);
@@ -590,9 +605,9 @@ class Game
     }
     
     // Instructions en bas
-    fill(136, 136, 136);
+    fill(150, 150, 150);
     textSize(18);
-    text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner", width/2, height - 50);
+    text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner  |  P : Reprendre", width/2, height - 60);
   }
   
   // Gestion des touches clavier

@@ -239,13 +239,13 @@ class Menu {
     
     switch(_selectedDifficulty) {
       case 0: // NIVEAU CHÈVRE
-        text("🐐 5 vies | Fantômes très lents | Super-gomme infinie", width/2, descY);
+        text(" 5 vies | Fantômes très lents | Super-gomme infinie", width/2, descY);
         break;
       case 1: // MOYEN
-        text("🟡 3 vies | Fantômes rapides | Durée réduite", width/2, descY);
+        text(" 3 vies | Fantômes rapides | Durée réduite", width/2, descY);
         break;
       case 2: // DIFFICILE
-        text("🔴 2 vies | Fantômes EXTRÊMMEMENT rapides | Mort instantanée", width/2, descY);
+        text(" 2 vies | Fantômes EXTRÊMMEMENT rapides | Mort instantanée", width/2, descY);
         break;
     }
     
@@ -312,24 +312,25 @@ class Menu {
   
   // Animation Pac-Man
   void drawAnimatedPacman() {
+    // Pac-Man fixe au centre
     pushMatrix();
-    translate(_pacmanX, 280);
+    translate(width/2, 280);
     
     fill(255, 255, 0);
     noStroke();
     
-    // Animation de la bouche
-    float mouthAngle = 45 * abs(sin(_animationFrame * 0.15));
+    // Pac-Man avec bouche fixe
+    float mouthAngle = 45;
     
     // Corps de Pac-Man
     arc(0, 0, 60, 60, radians(mouthAngle/2), radians(360 - mouthAngle/2), PIE);
     
     popMatrix();
     
-    // Dessiner quelques gommes devant Pac-Man
-    for (int i = 0; i < 5; i++) {
-      float dotX = _pacmanX + 100 + i * 40;
-      if (dotX > 0 && dotX < width) {
+    // Dessiner des gommes autour de Pac-Man
+    for (int i = -2; i <= 2; i++) {
+      if (i != 0) {
+        float dotX = width/2 + i * 80;
         fill(255, 184, 151);
         ellipse(dotX, 280, 12, 12);
       }
