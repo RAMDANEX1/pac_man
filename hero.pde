@@ -1,72 +1,72 @@
-// Classe Hero (Pac-Man)
+// pacman
 class Hero {
-  PVector _position;
-  PVector _posOffset;
+  PVector _pos;
+  PVector _offset;
   
-  // Position grille
-  int _cellX, _cellY;
+  // position grille
+  int _x, _y;
   
   // Affichage
   float _size;
-  float _mouthAngle;
-  float _mouthDirection;
+  float _angle;
+  float _angleDir;
   
   // Animation de mort
   boolean _dying;
-  int _deathTimer;
-  int _deathDuration;
+  int _timer;
+  int _duration;
   
   // Déplacement
   PVector _direction;
-  PVector _nextDirection;
-  boolean _moving;
-  float _speed;
+  PVector _nextDir;
+  boolean _bouge;
+  float _vitesse;
   
   Board _board;
   
   // Constructeur
   Hero(Board board, int startCellX, int startCellY) {
     _board = board;
-    _cellX = startCellX;
-    _cellY = startCellY;
+    _x = startCellX;
+    _y = startCellY;
     
     // Position pixel au centre de la cellule de départ
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    _position = cellCenter.copy();
-    _posOffset = new PVector(0, 0);
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    _pos = cellCenter.copy();
+    _offset = new PVector(0, 0);
     
     _direction = new PVector(0, 0);
-    _nextDirection = new PVector(0, 0);
-    _moving = false;
-    _speed = PACMAN_SPEED;
+    _nextDir = new PVector(0, 0);
+    _bouge = false;
+    _vitesse = PACMAN_SPEED;
     
     _size = PACMAN_SIZE;
-    _mouthAngle = 0;
-    _mouthDirection = 1;
+    _angle = 0;
+    _angleDir = 1;
     
     _dying = false;
-    _deathTimer = 0;
-    _deathDuration = 60; // 1 sec
+    _timer = 0;
+    _duration = 60; // 1 sec
   }
   
-  // Lance un mouvement dans une direction donnée
+  // lancer un mouvement
   void launchMove(PVector dir) {
-    // Normaliser la direction (pour avoir un vecteur unitaire)
+    // normaliser direction
     if (dir.mag() > 0) {
-      _nextDirection = dir.copy().normalize();
+      _nextDir = dir.copy().normalize();
     }
   }
   
-  // Déplace Pac-Man selon la direction actuelle
+  // deplacement selon direction
   void move(Board board) {
-    if (!_moving) return;
+    if (!_bouge) return;
     
-    // Calculer la nouvelle position potentielle
-    PVector nextPos = PVector.add(_position, PVector.mult(_direction, _speed));
+    // nouvelle position
+    PVector nextPos = PVector.add(_pos, PVector.mult(_direction, _vitesse));
     
     // Vérifier si on peut se déplacer (pas de mur)
     if (canMoveTo(nextPos, board)) {
-      _position = nextPos;
+      _pos = nextPos;
       
       // Mettre à jour la position de cellule
       updateCellPosition();
@@ -75,42 +75,42 @@ class Hero {
       checkTeleportation(board);
     } else {
       // Bloquer contre le mur : aligner sur le centre de la cellule
-      PVector cellCenter = board.getCellCenter(_cellX, _cellY);
+      PVector cellCenter = board.getCellCenter(_x, _y);
       
       // Aligner sur le centre de la cellule
-      _position = cellCenter.copy();
+      _pos = cellCenter.copy();
       
       // Arrêter le mouvement
-      _moving = false;
+      _bouge = false;
     }
   }
   
-  // Téléportation entre les bords de la carte
+  // teleportation bords
   void checkTeleportation(Board board) {
-    // Téléportation horizontale (gauche <-> droite)
-    if (_cellX < 0) {
-      _cellX = board._nbCellsX - 1;
-      _position.x = board._position.x + _cellX * board._cellSize + board._cellSize / 2;
-    } else if (_cellX >= board._nbCellsX) {
-      _cellX = 0;
-      _position.x = board._position.x + _cellX * board._cellSize + board._cellSize / 2;
+    // horizontal
+    if (_x < 0) {
+      _x = board._nbX - 1;
+      _pos.x = board._pos.x + _x * board._taille + board._taille / 2;
+    } else if (_x >= board._nbX) {
+      _x = 0;
+      _pos.x = board._pos.x + _x * board._taille + board._taille / 2;
     }
     
     // Téléportation verticale (haut <-> bas) - optionnel
-    if (_cellY < 0) {
-      _cellY = board._nbCellsY - 1;
-      _position.y = board._position.y + _cellY * board._cellSize + board._cellSize / 2;
-    } else if (_cellY >= board._nbCellsY) {
-      _cellY = 0;
-      _position.y = board._position.y + _cellY * board._cellSize + board._cellSize / 2;
+    if (_y < 0) {
+      _y = board._nbY - 1;
+      _pos.y = board._pos.y + _y * board._taille + board._taille / 2;
+    } else if (_y >= board._nbY) {
+      _y = 0;
+      _pos.y = board._pos.y + _y * board._taille + board._taille / 2;
     }
   }
   
   // Vérifie si Pac-Man peut se déplacer à une position donnée
   boolean canMoveTo(PVector pos, Board board) {
     // Calculer les coordonnées de cellule pour cette position
-    int cellX = floor((pos.x - board._position.x) / board._cellSize);
-    int cellY = floor((pos.y - board._position.y) / board._cellSize);
+    int cellX = floor((pos.x - board._pos.x) / board._taille);
+    int cellY = floor((pos.y - board._pos.y) / board._taille);
     
     // Vérifier les limites et les murs
     return !board.isWall(cellX, cellY);
@@ -118,29 +118,29 @@ class Hero {
   
   // Met à jour la position de cellule basée sur la position pixel
   void updateCellPosition() {
-    _cellX = floor((_position.x - _board._position.x) / _board._cellSize);
-    _cellY = floor((_position.y - _board._position.y) / _board._cellSize);
+    _x = floor((_pos.x - _board._pos.x) / _board._taille);
+    _y = floor((_pos.y - _board._pos.y) / _board._taille);
   }
   
-  // Essaie de changer de direction (depuis le buffer _nextDirection)
+  // Essaie de changer de direction (depuis le buffer _nextDir)
   void tryChangeDirection() {
-    if (_nextDirection.mag() == 0) return;  // Pas de nouvelle direction demandée
+    if (_nextDir.mag() == 0) return;  // Pas de nouvelle direction demandée
     
     // Vérifier si on est suffisamment centré sur une cellule
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    float distToCenter = PVector.dist(_position, cellCenter);
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    float distToCenter = PVector.dist(_pos, cellCenter);
     
     // Si on est proche du centre, essayer de changer de direction
-    if (distToCenter < _speed * 2.5) {
+    if (distToCenter < _vitesse * 2.5) {
       // Calculer la position après un mouvement dans la nouvelle direction
-      PVector testPos = PVector.add(cellCenter, PVector.mult(_nextDirection, _speed));
+      PVector testPos = PVector.add(cellCenter, PVector.mult(_nextDir, _vitesse));
       
       if (canMoveTo(testPos, _board)) {
         // Changement possible : aligner sur le centre et changer de direction
-        _position = cellCenter.copy();
-        _direction = _nextDirection.copy();
-        _moving = true;
-        _nextDirection.set(0, 0);  // Reset du buffer
+        _pos = cellCenter.copy();
+        _direction = _nextDir.copy();
+        _bouge = true;
+        _nextDir.set(0, 0);  // Reset du buffer
       }
     }
   }
@@ -149,11 +149,11 @@ class Hero {
   void update(Board board) {
     // Si en train de mourir, jouer l'animation
     if (_dying) {
-      _deathTimer++;
+      _timer++;
       
       // Ouvrir progressivement la bouche jusqu'à 180 degrés
-      float progress = (float)_deathTimer / _deathDuration;
-      _mouthAngle = 180 * progress;  // De 0 à 180 degrés
+      float progress = (float)_timer / _duration;
+      _angle = 180 * progress;  // De 0 à 180 degrés
       
       return;  // Ne pas bouger pendant l'animation de mort
     }
@@ -173,38 +173,38 @@ class Hero {
   // Déclenche l'animation de mort
   void die() {
     _dying = true;
-    _deathTimer = 0;
-    _moving = false;
+    _timer = 0;
+    _bouge = false;
   }
   
   // Retourne true si l'animation de mort est terminée
   boolean deathAnimationComplete() {
-    return _dying && _deathTimer >= _deathDuration;
+    return _dying && _timer >= _duration;
   }
   
   // Animation de la bouche (ouverture/fermeture)
   void animateMouth() {
-    if (_moving) {
-      _mouthAngle += MOUTH_SPEED * _mouthDirection * 10;
+    if (_bouge) {
+      _angle += MOUTH_SPEED * _angleDir * 10;
       
       // Inverser la direction d'animation
-      if (_mouthAngle >= MOUTH_ANGLE) {
-        _mouthAngle = MOUTH_ANGLE;
-        _mouthDirection = -1;
-      } else if (_mouthAngle <= 0) {
-        _mouthAngle = 0;
-        _mouthDirection = 1;
+      if (_angle >= MOUTH_ANGLE) {
+        _angle = MOUTH_ANGLE;
+        _angleDir = -1;
+      } else if (_angle <= 0) {
+        _angle = 0;
+        _angleDir = 1;
       }
     } else {
       // Si immobile, bouche légèrement ouverte
-      _mouthAngle = MOUTH_ANGLE * 0.3;
+      _angle = MOUTH_ANGLE * 0.3;
     }
   }
   
   // Affiche Pac-Man
   void drawIt() {
     // Si l'animation de mort est terminée, ne pas dessiner
-    if (_dying && _deathTimer >= _deathDuration) {
+    if (_dying && _timer >= _duration) {
       return;
     }
     
@@ -215,13 +215,13 @@ class Hero {
     }
     
     pushMatrix();
-    translate(_position.x, _position.y);
+    translate(_pos.x, _pos.y);
     rotate(rotationAngle);
     
     // Calculer l'opacité pendant la mort (disparition progressive)
     float alpha = 255;
     if (_dying) {
-      float progress = (float)_deathTimer / _deathDuration;
+      float progress = (float)_timer / _duration;
       alpha = 255 * (1 - progress);  // Disparaît progressivement
     }
     
@@ -231,8 +231,8 @@ class Hero {
     
     // Arc de cercle avec ouverture pour la bouche
     arc(0, 0, _size, _size, 
-        radians(_mouthAngle), 
-        radians(360 - _mouthAngle), 
+        radians(_angle), 
+        radians(360 - _angle), 
         PIE);
     
     // Œil de Pac-Man (sauf pendant la mort)
@@ -247,9 +247,10 @@ class Hero {
   }
   
   // Retourne la position de cellule actuelle
-  int getCellX() { return _cellX; }
-  int getCellY() { return _cellY; }
+  int getCellX() { return _x; }
+  int getCellY() { return _y; }
   
   // Retourne la direction actuelle
   PVector getDirection() { return _direction.copy(); }
 }
+

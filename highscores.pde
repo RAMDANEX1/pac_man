@@ -1,4 +1,4 @@
-// Gestion des meilleurs scores
+// meilleurs scores
 class HighScores {
   String[] names;
   int[] scores;
@@ -14,7 +14,7 @@ class HighScores {
   void load() {
     String[] lines = loadStrings(filepath);
     if (lines == null || lines.length == 0) {
-      // Initialiser avec des scores par defaut
+      // scores par defaut
       for (int i = 0; i < maxScores; i++) {
         names[i] = "---";
         scores[i] = 0;
@@ -39,7 +39,7 @@ class HighScores {
     saveStrings(filepath, lines);
   }
   
-  // Verifie si le score fait partie du top 5
+  // verifie si top 5
   boolean isHighScore(int score) {
     for (int i = 0; i < maxScores; i++) {
       if (score > scores[i]) {
@@ -49,9 +49,9 @@ class HighScores {
     return false;
   }
   
-  // Ajoute un score au classement
+  // ajout score
   void addScore(String name, int score) {
-    // Trouver la position
+    // trouver position
     int pos = maxScores;
     for (int i = 0; i < maxScores; i++) {
       if (score > scores[i]) {
@@ -60,7 +60,10 @@ class HighScores {
       }
     }
     
-    if (pos >= maxScores) return;
+    if (pos >= maxScores) {
+      println("Score enregistre mais pas dans top 5: " + name + " - " + score);
+      return;
+    }
     
     // Decaler les scores inferieurs
     for (int i = maxScores - 1; i > pos; i--) {
@@ -72,6 +75,7 @@ class HighScores {
     names[pos] = name;
     scores[pos] = score;
     
+    println("Score ajoute au top 5 position " + (pos+1) + ": " + name + " - " + score);
     save();
   }
   
@@ -85,15 +89,28 @@ class HighScores {
     fill(255);
     int startY = 200;
     
+    // afficher seulement les scores valides (non vides et > 0)
+    int displayCount = 0;
     for (int i = 0; i < maxScores; i++) {
-      String line = (i+1) + ".  " + names[i];
-      // Ajouter des espaces pour aligner
-      while (line.length() < 25) {
-        line += " ";
+      // ignorer les scores a 0 ou les noms vides/par defaut
+      if (scores[i] > 0 && !names[i].equals("---")) {
+        String line = (displayCount+1) + ".  " + names[i];
+        // Ajouter des espaces pour aligner
+        while (line.length() < 25) {
+          line += " ";
+        }
+        line += scores[i];
+        
+        text(line, width/2, startY + displayCount * 50);
+        displayCount++;
       }
-      line += scores[i];
-      
-      text(line, width/2, startY + i * 50);
+    }
+    
+    // si aucun score, afficher message
+    if (displayCount == 0) {
+      fill(150);
+      textSize(24);
+      text("Aucun score enregistre", width/2, startY + 100);
     }
     
     textSize(18);

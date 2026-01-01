@@ -1,25 +1,25 @@
-// Dimensions
-final int CELL_SIZE = 40;           // Taille d'une cellule en pixels
-final int BOARD_WIDTH = 19;         // Nombre de cellules en largeur
-final int BOARD_HEIGHT = 21;        // Nombre de cellules en hauteur
-final int BOARD_OFFSET_X = 50;      // Décalage du plateau (x)
-final int BOARD_OFFSET_Y = 100;     // Décalage du plateau (y)
+// dimensions
+final int CELL_SIZE = 40;
+final int BOARD_WIDTH = 19;
+final int BOARD_HEIGHT = 21;
+final int BOARD_OFFSET_X = 50;
+final int BOARD_OFFSET_Y = 100;
 
-// Scores
-final int SCORE_DOT = 10;           // Points pour une gomme normale
+// scores
+final int SCORE_DOT = 10;
 final int SCORE_SUPER_DOT = 50;     // Points pour une super-gomme
 final int SCORE_GHOST = 200;        // Points pour manger un fantôme
 
-// Couleurs
-final color COLOR_WALL = color(33, 33, 222);         // Bleu foncé pour les murs
-final color COLOR_BG = color(0, 0, 0);               // Fond noir
-final color COLOR_DOT = color(255, 184, 151);        // Beige pour les gommes
-final color COLOR_SUPER_DOT = color(255, 165, 0);    // Orange pour super-gommes
-final color COLOR_EMPTY = color(0, 0, 0);            // Noir pour cases vides
-final color COLOR_TEXT = color(255, 255, 255);       // Blanc pour le texte
-final color COLOR_PACMAN = color(255, 255, 0);       // Jaune pour Pac-Man
+// couleurs
+final color COLOR_WALL = color(33, 33, 222);
+final color COLOR_BG = color(0, 0, 0);
+final color COLOR_DOT = color(255, 184, 151);
+final color COLOR_SUPER_DOT = color(255, 165, 0);
+final color COLOR_EMPTY = color(0, 0, 0);
+final color COLOR_TEXT = color(255, 255, 255);
+final color COLOR_PACMAN = color(255, 255, 0);
 
-// Pac-Man
+// pacman
 final float PACMAN_SIZE = 30;             // Taille de Pac-Man
 final float PACMAN_SPEED = 4.0;           // Vitesse de déplacement (pixels par frame)
 final float MOUTH_ANGLE = 45;             // Angle d'ouverture de la bouche (degrés)

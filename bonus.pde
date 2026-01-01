@@ -1,7 +1,7 @@
-// Classe Bonus (fruits)
+// bonus fruits
 class Bonus {
-  int _cellX, _cellY;
-  PVector _position;
+  int _x, _y;
+  PVector _pos;
   int _score;
   String _type;
   color _color;
@@ -15,8 +15,8 @@ class Bonus {
   // Constructeur
   Bonus(Board board, int cellX, int cellY, String type) {
     _board = board;
-    _cellX = cellX;
-    _cellY = cellY;
+    _x = cellX;
+    _y = cellY;
     _type = type;
     _active = false;
     _timer = BONUS_DURATION;
@@ -60,14 +60,14 @@ class Bonus {
         break;
     }
     
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    _position = cellCenter.copy();
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    _pos = cellCenter.copy();
   }
   
-  // Mise à jour du bonus
+  // maj bonus
   void update(int dotsEaten, int totalDots) {
     if (!_active) {
-      // Déterminer quel fruit faire apparaître selon les gommes mangées
+      // quel fruit apparait
       String newType = null;
       boolean shouldSpawn = false;
       
@@ -111,14 +111,14 @@ class Bonus {
     }
   }
   
-  // Fait apparaître le bonus
+  // fait apparaitre
   void spawn() {
-    // Choisir une nouvelle position aléatoire à chaque apparition
+    // nouvelle position random
     chooseRandomPosition();
     
     _active = true;
     _timer = BONUS_DURATION;
-    println("Bonus actif! Type: " + _type + ", Score: " + _score + ", Position: (" + _cellX + ", " + _cellY + ")");
+    println("Bonus actif! Type: " + _type + ", Score: " + _score + ", Position: (" + _x + ", " + _y + ")");
   }
   
   // Change le type de fruit
@@ -169,7 +169,7 @@ class Bonus {
   boolean collidesWith(Hero hero) {
     if (!_active) return false;
     
-    float distance = dist(_position.x, _position.y, hero._position.x, hero._position.y);
+    float distance = dist(_pos.x, _pos.y, hero._pos.x, hero._pos.y);
     return distance < 20;
   }
   
@@ -178,7 +178,7 @@ class Bonus {
     if (!_active) return;
     
     pushMatrix();
-    translate(_position.x, _position.y);
+    translate(_pos.x, _pos.y);
     
     // Effet de pulsation
     float pulse = 1 + 0.1 * sin(frameCount * 0.15);
@@ -328,13 +328,13 @@ class Bonus {
     _timer = BONUS_DURATION;
   }
   
-  // Choisit une position aléatoire parmi les espaces vides/gommes
+  // position aleatoire
   void chooseRandomPosition() {
-    // Lister toutes les positions possibles (vides, gommes, super-gommes)
+    // liste positions possibles
     ArrayList<PVector> validPositions = new ArrayList<PVector>();
     
-    for (int y = 1; y < _board._nbCellsY - 1; y++) {
-      for (int x = 1; x < _board._nbCellsX - 1; x++) {
+    for (int y = 1; y < _board._nbY - 1; y++) {
+      for (int x = 1; x < _board._nbX - 1; x++) {
         TypeCell cell = _board.getCellType(x, y);
         // Accepter les espaces vides, gommes et super-gommes (pas les murs)
         if (cell == TypeCell.EMPTY || cell == TypeCell.DOT || cell == TypeCell.SUPER_DOT) {
@@ -350,12 +350,12 @@ class Bonus {
     if (validPositions.size() > 0) {
       int randomIndex = (int)random(validPositions.size());
       PVector chosen = validPositions.get(randomIndex);
-      _cellX = (int)chosen.x;
-      _cellY = (int)chosen.y;
+      _x = (int)chosen.x;
+      _y = (int)chosen.y;
       
       // Mettre à jour la position pixel
-      PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-      _position = cellCenter.copy();
+      PVector cellCenter = _board.getCellCenter(_x, _y);
+      _pos = cellCenter.copy();
     }
   }
   
@@ -407,3 +407,5 @@ class Bonus {
     line(-10 * scale, 0, 10 * scale, 0);  // Horizontale
   }
 }
+
+

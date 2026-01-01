@@ -1,9 +1,9 @@
-// Classe Game - gère la partie
+// gestion de partie
 class Game 
 {
-  Board _board;              // Le plateau de jeu
-  Hero _hero;                // Pac-Man
-  Ghost[] _ghosts;           // Tableau de fantômes
+  Board _board;
+  Hero _hero;
+  Ghost[] _ghosts;
   
   String _levelName;         // Nom du niveau actuel
   int _score;                // Score du joueur
@@ -35,7 +35,7 @@ class Game
   int _difficulty;           // 0=EASY, 1=MEDIUM, 2=HARD
   DifficultySettings _diffSettings;
   
-  // Constructeur : initialise le jeu
+  // init jeu
   Game(int difficulty) {
     _board = null;
     _hero = null;
@@ -102,25 +102,25 @@ class Game
     int ghostBoxY = 10;
     int baseDelay = _diffSettings.releaseDelay;
     
-    // Blinky (rouge)
+    // blinky rouge
     _ghosts[0] = new Ghost(_board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
     _ghosts[0]._speed = _diffSettings.ghostSpeed;
-    _ghosts[0]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
+    _ghosts[0]._vitesseNormale = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Pinky (rose)
     _ghosts[1] = new Ghost(_board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", (int)(baseDelay * 0.5));
     _ghosts[1]._speed = _diffSettings.ghostSpeed;
-    _ghosts[1]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
+    _ghosts[1]._vitesseNormale = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Inky (bleu)  
     _ghosts[2] = new Ghost(_board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", baseDelay);
     _ghosts[2]._speed = _diffSettings.ghostSpeed;
-    _ghosts[2]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
+    _ghosts[2]._vitesseNormale = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
     // Clyde (orange)
     _ghosts[3] = new Ghost(_board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", (int)(baseDelay * 1.5));
     _ghosts[3]._speed = _diffSettings.ghostSpeed;
-    _ghosts[3]._normalSpeed = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
+    _ghosts[3]._vitesseNormale = _diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
   }
   
   void update() {
@@ -128,9 +128,8 @@ class Game
     
     if (_gameOver) {
       _gameOverTimer++;
-      // Vérifier si c'est un high score et si on n'est pas déjà en train d'entrer le nom
+      // toujours demander le nom
       if (_gameOverTimer == 60 && !_enteringName) {
-        // Toujours demander le nom (game over ou niveau terminé)
         _enteringName = true;
         _playerName = "";
       }
@@ -202,15 +201,15 @@ class Game
     }
   }
   
-  // Vérifie si Pac-Man a mangé une gomme et met à jour le score
+  // verifie si gomme mangee
   void checkDotEaten() {
     TypeCell currentCell = _board.getCellType(_hero.getCellX(), _hero.getCellY());
     
-    // Vérifier si on est centré sur la cellule
+    // verif centre cellule
     PVector cellCenter = _board.getCellCenter(_hero.getCellX(), _hero.getCellY());
-    float distToCenter = PVector.dist(_hero._position, cellCenter);
+    float distToCenter = PVector.dist(_hero._pos, cellCenter);
     
-    if (distToCenter < _board._cellSize * 0.3) {
+    if (distToCenter < _board._taille * 0.3) {
       if (currentCell == TypeCell.DOT) {
         _board.setCellType(_hero.getCellX(), _hero.getCellY(), TypeCell.EMPTY);
         _score += SCORE_DOT;
@@ -233,19 +232,19 @@ class Game
     }
   }
   
-  // Vérifie la collision avec un fantôme
+  // collision fantome
   void checkGhostCollision(Ghost ghost) {
     if (ghost.collidesWith(_hero)) {
       if (ghost.isScared()) {
-        // Pac-Man mange le fantôme effrayé -> transformer en yeux
+        // manger fantome
         _ghostCombo++;
         int ghostScore = SCORE_GHOST * (int)pow(2, _ghostCombo - 1); // 200, 400, 800, 1600
         _score += ghostScore;
         println("Fantôme mangé ! Combo x" + _ghostCombo + " = +" + ghostScore + " points");
         
         ghost._eyes = true;
-        ghost._scared = false;
-        ghost._scaredTimer = 0;
+        ghost._peur = false;
+        ghost._timerPeur = 0;
       } else if (!_hero._dying) {  // Seulement si pas déjà en train de mourir
         // Déclencher l'animation de mort
         _ghostCombo = 0;  // Réinitialiser le combo
@@ -329,12 +328,12 @@ class Game
     }
   }
   
-  // Affiche l'en-tête du jeu
+  // titre jeu
   void drawHeader() {
-    fill(color(0, 100, 255)); // Bleu vif
+    fill(color(0, 100, 255));
     textAlign(CENTER);
-    textSize(48); // Plus gros
-    // Effet gras : dessiner le texte plusieurs fois avec léger décalage
+    textSize(48);
+    // effet gras
     text("PAC-MAN", width/2, 50);
     text("PAC-MAN", width/2 + 1, 50);
     text("PAC-MAN", width/2, 50 + 1);
@@ -360,7 +359,7 @@ class Game
     text(gommesText, BOARD_OFFSET_X + 450, BOARD_OFFSET_Y - 29);
     
     // Afficher les vies et cerises à droite de la map (style Pac-Man original)
-    int rightX = BOARD_OFFSET_X + _board._nbCellsX * CELL_SIZE + 30;
+    int rightX = BOARD_OFFSET_X + _board._nbX * CELL_SIZE + 30;
     int startY = BOARD_OFFSET_Y + 400;  // Plus bas pour éviter la légende des trajectoires
     
     // Titre
@@ -399,7 +398,7 @@ class Game
   
   // DEBUG - Affiche la légende des trajectoires des fantômes
   void drawPathLegend() {
-    int legendX = BOARD_OFFSET_X + _board._nbCellsX * CELL_SIZE + 50;
+    int legendX = BOARD_OFFSET_X + _board._nbX * CELL_SIZE + 50;
     int legendY = BOARD_OFFSET_Y + 50;
     
     fill(COLOR_TEXT);
@@ -697,6 +696,7 @@ class Game
         // Valider le nom
         if (_playerName.length() > 0) {
           _highScores.addScore(_playerName, _score);
+          println("Score sauvegarde: " + _playerName + " - " + _score);
           _enteringName = false;
         }
       } else if (k == 8 || k == 127) {
@@ -766,3 +766,5 @@ class Game
     return _returnToMenu;
   }
 }
+
+

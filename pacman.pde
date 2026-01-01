@@ -2,15 +2,15 @@ Game game;
 Menu menu;
 boolean inMenu;
 
-void setup() { // Initialisation du jeu
+void setup() {
   size(900, 950, P2D);
-  println("=== DÉMARRAGE DU JEU PAC-MAN ===");
+  println("=== DEMARRAGE PAC-MAN ===");
   
-  // Créer le menu d'abord
+  // menu au debut
   menu = new Menu();
   inMenu = true;
   
-  // Le jeu sera créé quand l'utilisateur choisit "JOUER"
+  // jeu cree apres choix JOUER
   game = null;
   
   frameRate(60);
@@ -39,12 +39,12 @@ void draw() {
 
 void keyPressed() {
   if (inMenu) {
-    // Vérifier l'état AVANT de gérer la touche
+    // verif etat avant
     boolean wasSelectingDifficulty = menu._selectingDifficulty;
     
     menu.handleKey(key);
     
-    // Si l'utilisateur a sélectionné une difficulté (et était déjà dans cet écran)
+    // si difficulte selectionnee
     if (key == '\n' || key == '\r') {
       if (wasSelectingDifficulty && menu._selectingDifficulty) {
         // Démarrer le jeu avec la difficulté sélectionnée
@@ -57,12 +57,12 @@ void keyPressed() {
     }
   } else {
     if (game != null) {
-      // Touche ESC pour mettre en pause
+      // ESC = pause
       if (key == ESC) {
         game.togglePause();
-        key = 0; // Empêcher la fermeture de l'application
+        key = 0;
       } else if (game._paused && (key == '\n' || key == '\r')) {
-        // Dans le menu pause, ENTRÉE est pressée
+        // menu pause ENTREE
         if (game._pauseMenuOption == 1) {
           // Option "MENU PRINCIPAL" sélectionnée
           inMenu = true;

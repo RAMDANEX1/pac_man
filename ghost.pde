@@ -1,8 +1,8 @@
 // Classe Ghost
 class Ghost {
-  PVector _position;
+  PVector _pos;
   
-  int _cellX, _cellY;
+  int _x, _y;
   
   // Affichage
   float _size;
@@ -12,55 +12,55 @@ class Ghost {
   // Déplacement
   PVector _direction;
   float _speed;
-  float _normalSpeed;  // Vitesse normale (vitesse de difficulté)
-  boolean _moving;
+  float _vitesseNormale;  // Vitesse normale (vitesse de difficulté)
+  boolean _bouge;
   
-  boolean _scared;
-  int _scaredTimer;
+  boolean _peur;
+  int _timerPeur;
   boolean _released;
-  int _releaseTimer;
-  PVector _homePosition;
+  int _timerSortie;
+  PVector _maison;
   boolean _eyes;
-  int _behaviorTimer;
+  int _timerBehav;
   
   Board _board;
   
   // DEBUG
-  ArrayList<PVector> _pathPoints;
-  int _pathUpdateCounter;
+  ArrayList<PVector> _chemin;
+  int _compteurChemin;
   
   // Constructeur
   Ghost(Board board, int startCellX, int startCellY, color ghostColor, String name, int releaseDelay) {
     _board = board;
-    _cellX = startCellX;
-    _cellY = startCellY;
+    _x = startCellX;
+    _y = startCellY;
     _color = ghostColor;
     _name = name;
     _size = GHOST_SIZE;
     
     // Position pixel au centre de la cellule
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    _position = cellCenter.copy();
-    _homePosition = _position.copy();
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    _pos = cellCenter.copy();
+    _maison = _pos.copy();
     
     // Initialisation du mouvement - direction aléatoire gauche ou droite
     float dirX = random(1) > 0.5 ? 1 : -1;
     _direction = new PVector(dirX, 0);
     _speed = GHOST_SPEED;
-    _normalSpeed = GHOST_SPEED;  // Mémoriser la vitesse normale
-    _moving = true;  // Commencer en mouvement
+    _vitesseNormale = GHOST_SPEED;  // Mémoriser la vitesse normale
+    _bouge = true;  // Commencer en mouvement
     
     // États initiaux
-    _scared = false;
-    _scaredTimer = 0;
+    _peur = false;
+    _timerPeur = 0;
     _released = (releaseDelay == 0);
-    _releaseTimer = releaseDelay;
+    _timerSortie = releaseDelay;
     _eyes = false;
-    _behaviorTimer = 0;
+    _timerBehav = 0;
     
     // Initialiser la trajectoire pour le debug
-    _pathPoints = new ArrayList<PVector>();
-    _pathUpdateCounter = 0;
+    _chemin = new ArrayList<PVector>();
+    _compteurChemin = 0;
   }
   
   // Mise à jour du fantôme
@@ -73,8 +73,8 @@ class Ghost {
     
     // Gestion du timer de sortie
     if (!_released) {
-      _releaseTimer--;
-      if (_releaseTimer <= 0) {
+      _timerSortie--;
+      if (_timerSortie <= 0) {
         _released = true;
       }
       // IMPORTANT : Les fantômes restent FIXES dans la cage tant que !_released
@@ -82,12 +82,12 @@ class Ghost {
     }
     
     // Gestion du mode effrayé
-    if (_scared) {
-      _scaredTimer--;
-      if (_scaredTimer <= 0) {
-        _scared = false;
+    if (_peur) {
+      _timerPeur--;
+      if (_timerPeur <= 0) {
+        _peur = false;
         // Restaurer la vitesse normale (vitesse de difficulté)
-        _speed = _normalSpeed;
+        _speed = _vitesseNormale;
       }
     }
     
@@ -106,34 +106,33 @@ class Ghost {
     int homeY = 10;
     
     // Si arrivé à la cage, se régénérer
-    if (_cellX == homeX && _cellY == homeY) {
-      PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-      _position = cellCenter.copy();
+    if (_x == homeX && _y == homeY) {
+      PVector cellCenter = _board.getCellCenter(_x, _y);
+      _pos = cellCenter.copy();
       
       // Redevenir vivant (V)
       _eyes = false;
-      _scared = false;
-      _scaredTimer = 0;
+      _peur = false;
+      _timerPeur = 0;
       _released = false;
-      _releaseTimer = 180; // Attendre 3 secondes avant de ressortir
+      _timerSortie = 180; // Attendre 3 secondes avant de ressortir
       _direction = new PVector(0, -1); // Direction vers le haut pour sortir
-      _speed = _normalSpeed;  // Restaurer la vitesse normale (vitesse de difficulté)
+      _speed = _vitesseNormale;  // Restaurer la vitesse normale (vitesse de difficulté)
       
       // DEBUG - Effacer la trajectoire lors de la régénération
-      _pathPoints.clear();
+      _chemin.clear();
       return;
     }
     
-    // Vitesse plus rapide en mode yeux
+    // vitesse rapide mode yeux
     _speed = GHOST_SPEED * 2;
     
-    // Utiliser le chemin BFS calculé pour suivre exactement la trajectoire affichée
-    // Calculer le chemin avec BFS
-    ArrayList<PVector> pathCells = calculatePath(_cellX, _cellY, homeX, homeY);
+    // calculer chemin vers maison
+    ArrayList<PVector> pathCells = trouverChemin(_x, _y, homeX, homeY);
     
     // Vérifier si on est au centre d'une cellule
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    float distToCenter = PVector.dist(_position, cellCenter);
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    float distToCenter = PVector.dist(_pos, cellCenter);
     
     if (distToCenter < _speed * 1.5) {
       if (pathCells.size() >= 2) {
@@ -142,8 +141,8 @@ class Ghost {
         PVector nextCell = pathCells.get(1);
         
         // Calculer la direction vers la prochaine cellule
-        int dirX = (int)nextCell.x - _cellX;
-        int dirY = (int)nextCell.y - _cellY;
+        int dirX = (int)nextCell.x - _x;
+        int dirY = (int)nextCell.y - _y;
         _direction = new PVector(dirX, dirY);
       } else {
         // Si pas de chemin BFS trouvé (bloqué), utiliser approche greedy comme fallback
@@ -156,8 +155,8 @@ class Ghost {
         };
         
         for (PVector dir : directions) {
-          int nextX = _cellX + (int)dir.x;
-          int nextY = _cellY + (int)dir.y;
+          int nextX = _x + (int)dir.x;
+          int nextY = _y + (int)dir.y;
           
           if (!_board.isWall(nextX, nextY)) {
             possibleDirs.add(dir);
@@ -170,8 +169,8 @@ class Ghost {
           float bestDist = Float.MAX_VALUE;
           
           for (PVector dir : possibleDirs) {
-            int nextX = _cellX + (int)dir.x;
-            int nextY = _cellY + (int)dir.y;
+            int nextX = _x + (int)dir.x;
+            int nextY = _y + (int)dir.y;
             float d = dist(nextX, nextY, homeX, homeY);
             
             if (d < bestDist) {
@@ -194,17 +193,17 @@ class Ghost {
     updatePath(null);
   }
   
-  // IA avec comportements spécifiques selon le fantôme
+  // choix direction selon comportement
   void chooseDirection(Hero hero) {
-    // Si dans la cage, logique spéciale de sortie
-    boolean inCage = (_cellY == 10 && _cellX >= 9 && _cellX <= 13);
-    boolean aboveCage = (_cellY == 9 && _cellX >= 9 && _cellX <= 13);
+    // sortie de la cage
+    boolean inCage = (_y == 10 && _x >= 9 && _x <= 13);
+    boolean aboveCage = (_y == 9 && _x >= 9 && _x <= 13);
     
     if (inCage) {
       // Dans la cage : d'abord aller au centre (x=11), puis monter
-      if (_cellX < 11) {
+      if (_x < 11) {
         _direction = new PVector(1, 0);  // Aller à droite vers le centre
-      } else if (_cellX > 11) {
+      } else if (_x > 11) {
         _direction = new PVector(-1, 0);  // Aller à gauche vers le centre
       } else {
         _direction = new PVector(0, -1);  // Au centre, monter
@@ -218,8 +217,8 @@ class Ghost {
     }
     
     // Vérifier si on est au centre d'une cellule
-    PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-    float distToCenter = PVector.dist(_position, cellCenter);
+    PVector cellCenter = _board.getCellCenter(_x, _y);
+    float distToCenter = PVector.dist(_pos, cellCenter);
     
     if (distToCenter < _speed * 1.5) {
       // On est au centre, on peut changer de direction
@@ -237,8 +236,8 @@ class Ghost {
         // Éviter le demi-tour sauf si c'est la seule option
         if (possibleDirs.size() > 0 && PVector.dot(dir, _direction) < -0.5) continue;
         
-        int nextX = _cellX + (int)dir.x;
-        int nextY = _cellY + (int)dir.y;
+        int nextX = _x + (int)dir.x;
+        int nextY = _y + (int)dir.y;
         
         if (!_board.isWall(nextX, nextY)) {
           possibleDirs.add(dir);
@@ -248,8 +247,8 @@ class Ghost {
       // Si aucune direction trouvée, autoriser le demi-tour
       if (possibleDirs.size() == 0) {
         for (PVector dir : directions) {
-          int nextX = _cellX + (int)dir.x;
-          int nextY = _cellY + (int)dir.y;
+          int nextX = _x + (int)dir.x;
+          int nextY = _y + (int)dir.y;
           
           if (!_board.isWall(nextX, nextY)) {
             possibleDirs.add(dir);
@@ -258,22 +257,22 @@ class Ghost {
       }
       
       if (possibleDirs.size() > 0) {
-        if (_scared) {
+        if (_peur) {
           // Mode effrayé : choisir aléatoirement
           _direction = possibleDirs.get((int)random(possibleDirs.size())).copy();
         } else {
-          // Choisir selon le type de fantôme en utilisant le chemin BFS
+          // choisir selon type fantome
           PVector targetCell = getTargetCell(hero);
           
-          // Calculer le chemin BFS vers la cible
-          ArrayList<PVector> pathCells = calculatePath(_cellX, _cellY, (int)targetCell.x, (int)targetCell.y);
+          // calculer chemin vers cible
+          ArrayList<PVector> pathCells = trouverChemin(_x, _y, (int)targetCell.x, (int)targetCell.y);
           
           // Si on a un chemin avec au moins 2 cellules (position actuelle + prochaine)
           if (pathCells.size() >= 2) {
             // Prendre la direction vers la prochaine cellule du chemin BFS
             PVector nextCell = pathCells.get(1);
-            int dirX = (int)nextCell.x - _cellX;
-            int dirY = (int)nextCell.y - _cellY;
+            int dirX = (int)nextCell.x - _x;
+            int dirY = (int)nextCell.y - _y;
             _direction = new PVector(dirX, dirY);
           } else {
             // Si pas de chemin, utiliser l'approche greedy comme fallback
@@ -281,8 +280,8 @@ class Ghost {
             float bestDist = Float.MAX_VALUE;
             
             for (PVector dir : possibleDirs) {
-              int nextX = _cellX + (int)dir.x;
-              int nextY = _cellY + (int)dir.y;
+              int nextX = _x + (int)dir.x;
+              int nextY = _y + (int)dir.y;
               float dist = dist(nextX, nextY, targetCell.x, targetCell.y);
               
               if (dist < bestDist) {
@@ -300,38 +299,38 @@ class Ghost {
     }
   }
   
-  // Détermine la cellule cible selon le type de fantôme
+  // cible selon type de fantome
   PVector getTargetCell(Hero hero) {
     if (hero == null) {
-      return new PVector(_cellX, _cellY);
+      return new PVector(_x, _y);
     }
     
     int heroX = hero.getCellX();
     int heroY = hero.getCellY();
     
-    // Comportements spécifiques selon le nom
+    // comportements differents
     if (_name.equals("Blinky")) {
-      // BLINKY (rouge) : suit directement Pac-Man
+      // suit pacman directement
       return new PVector(heroX, heroY);
       
     } else if (_name.equals("Pinky")) {
-      // PINKY (rose) : vise 4 cases devant Pac-Man
+      // anticipe mouvement
       PVector heroDir = hero.getDirection();
       int targetX = heroX + (int)(heroDir.x * 4);
       int targetY = heroY + (int)(heroDir.y * 4);
       return new PVector(targetX, targetY);
       
     } else if (_name.equals("Inky")) {
-      // INKY (bleu/cyan) : de temps en temps, part dans la direction opposée
-      _behaviorTimer--;
-      if (_behaviorTimer <= 0) {
-        _behaviorTimer = (int)random(180, 300); // Change tous les 3-5 secondes
+      // parfois part en direction opposee
+      _timerBehav--;
+      if (_timerBehav <= 0) {
+        _timerBehav = (int)random(180, 300);
       }
       
-      if (_behaviorTimer > 240) {
-        // Direction opposée de Pac-Man
-        int targetX = _cellX - (heroX - _cellX);
-        int targetY = _cellY - (heroY - _cellY);
+      if (_timerBehav > 240) {
+        // direction inverse
+        int targetX = _x - (heroX - _x);
+        int targetY = _y - (heroY - _y);
         return new PVector(targetX, targetY);
       } else {
         // Suit Pac-Man normalement
@@ -339,24 +338,24 @@ class Ghost {
       }
       
     } else if (_name.equals("Clyde")) {
-      // CLYDE (orange) : fuit seulement quand TRÈS proche (< 3 cases)
-      float distToPacman = dist(_cellX, _cellY, heroX, heroY);
+      // fuit quand trop proche
+      float distToPacman = dist(_x, _y, heroX, heroY);
       
       if (distToPacman < 3) {
-        // Très proche ! Fuir dans la direction opposée
-        int targetX = _cellX - (heroX - _cellX);
-        int targetY = _cellY - (heroY - _cellY);
+        // fuite
+        int targetX = _x - (heroX - _x);
+        int targetY = _y - (heroY - _y);
         return new PVector(targetX, targetY);
       } else {
         // Pas trop proche : comportement aléatoire/poursuite
-        _behaviorTimer--;
-        if (_behaviorTimer <= 0) {
-          _behaviorTimer = (int)random(120, 240);
+        _timerBehav--;
+        if (_timerBehav <= 0) {
+          _timerBehav = (int)random(120, 240);
         }
         
-        if (_behaviorTimer > 180) {
+        if (_timerBehav > 180) {
           // Direction aléatoire
-          return new PVector(random(_board._nbCellsX), random(_board._nbCellsY));
+          return new PVector(random(_board._nbX), random(_board._nbY));
         } else {
           // Suit Pac-Man
           return new PVector(heroX, heroY);
@@ -370,18 +369,18 @@ class Ghost {
   
   // Déplace le fantôme
   void move() {
-    PVector nextPos = PVector.add(_position, PVector.mult(_direction, _speed));
+    PVector nextPos = PVector.add(_pos, PVector.mult(_direction, _speed));
     
     if (canMoveTo(nextPos)) {
-      _position = nextPos;
+      _pos = nextPos;
       updateCellPosition();
       
       // Téléportation pour les fantômes aussi
       checkTeleportation();
     } else {
       // Si bloqué, aligner sur le centre de la cellule et forcer un nouveau choix
-      PVector cellCenter = _board.getCellCenter(_cellX, _cellY);
-      _position = cellCenter.copy();
+      PVector cellCenter = _board.getCellCenter(_x, _y);
+      _pos = cellCenter.copy();
       
       // Chercher une direction valide immédiatement
       PVector[] directions = {
@@ -390,8 +389,8 @@ class Ghost {
       };
       
       for (PVector dir : directions) {
-        int nextX = _cellX + (int)dir.x;
-        int nextY = _cellY + (int)dir.y;
+        int nextX = _x + (int)dir.x;
+        int nextY = _y + (int)dir.y;
         if (!_board.isWall(nextX, nextY)) {
           _direction = dir.copy();
           break;
@@ -402,8 +401,8 @@ class Ghost {
   
   // Vérifie si le fantôme peut se déplacer à une position
   boolean canMoveTo(PVector pos) {
-    int cellX = floor((pos.x - _board._position.x) / _board._cellSize);
-    int cellY = floor((pos.y - _board._position.y) / _board._cellSize);
+    int cellX = floor((pos.x - _board._pos.x) / _board._taille);
+    int cellY = floor((pos.y - _board._pos.y) / _board._taille);
     
     // Vérifier si c'est un mur
     if (_board.isWall(cellX, cellY)) return false;
@@ -411,7 +410,7 @@ class Ghost {
     // Les fantômes released ne peuvent pas rentrer dans la cage (SAUF en mode yeux OU s'ils sont déjà dans la cage)
     if (!_eyes) {
       boolean targetInCage = (cellY == 10 && cellX >= 9 && cellX <= 13);
-      boolean currentInCage = (_cellY == 10 && _cellX >= 9 && _cellX <= 13);
+      boolean currentInCage = (_y == 10 && _x >= 9 && _x <= 13);
       
       // Empêcher entrée dans cage si released et pas dans cage actuellement
       // MAIS permettre le mouvement dans la cage si on y est déjà (pour sortir)
@@ -425,28 +424,28 @@ class Ghost {
   
   // Met à jour la position de cellule
   void updateCellPosition() {
-    _cellX = floor((_position.x - _board._position.x) / _board._cellSize);
-    _cellY = floor((_position.y - _board._position.y) / _board._cellSize);
+    _x = floor((_pos.x - _board._pos.x) / _board._taille);
+    _y = floor((_pos.y - _board._pos.y) / _board._taille);
   }
   
   // Téléportation entre les bords de la carte
   void checkTeleportation() {
     // Téléportation horizontale (gauche <-> droite)
-    if (_cellX < 0) {
-      _cellX = _board._nbCellsX - 1;
-      _position.x = _board._position.x + _cellX * _board._cellSize + _board._cellSize / 2;
-    } else if (_cellX >= _board._nbCellsX) {
-      _cellX = 0;
-      _position.x = _board._position.x + _cellX * _board._cellSize + _board._cellSize / 2;
+    if (_x < 0) {
+      _x = _board._nbX - 1;
+      _pos.x = _board._pos.x + _x * _board._taille + _board._taille / 2;
+    } else if (_x >= _board._nbX) {
+      _x = 0;
+      _pos.x = _board._pos.x + _x * _board._taille + _board._taille / 2;
     }
     
     // Téléportation verticale (haut <-> bas) - optionnel
-    if (_cellY < 0) {
-      _cellY = _board._nbCellsY - 1;
-      _position.y = _board._position.y + _cellY * _board._cellSize + _board._cellSize / 2;
-    } else if (_cellY >= _board._nbCellsY) {
-      _cellY = 0;
-      _position.y = _board._position.y + _cellY * _board._cellSize + _board._cellSize / 2;
+    if (_y < 0) {
+      _y = _board._nbY - 1;
+      _pos.y = _board._pos.y + _y * _board._taille + _board._taille / 2;
+    } else if (_y >= _board._nbY) {
+      _y = 0;
+      _pos.y = _board._pos.y + _y * _board._taille + _board._taille / 2;
     }
   }
   
@@ -455,8 +454,8 @@ class Ghost {
     // Ne pas effrayer les fantômes en mode yeux ou non-released
     if (_eyes || !_released) return;
     
-    _scared = true;
-    _scaredTimer = duration;
+    _peur = true;
+    _timerPeur = duration;
     
     // Clyde (orange) est un peu plus rapide que les autres en mode effrayé
     if (_name.equals("Clyde")) {
@@ -469,33 +468,33 @@ class Ghost {
   // Réinitialise le fantôme (quand Pac-Man est mangé OU après être mangé par Pac-Man)
   void reset() {
     // Retourner à la position de départ
-    _position = _homePosition.copy();
-    _cellX = (int)((_position.x - _board._position.x) / _board._cellSize);
-    _cellY = (int)((_position.y - _board._position.y) / _board._cellSize);
+    _pos = _maison.copy();
+    _x = (int)((_pos.x - _board._pos.x) / _board._taille);
+    _y = (int)((_pos.y - _board._pos.y) / _board._taille);
     
     // Réinitialiser les états
-    _scared = false;
-    _scaredTimer = 0;
+    _peur = false;
+    _timerPeur = 0;
     _eyes = false;
     // NE PAS réinitialiser _speed ici pour garder la vitesse de difficulté
     
     // Si c'était Blinky (déjà released au départ), rester released
     // Les autres retournent dans la cage
-    if (_releaseTimer == 0 && _name.equals("Blinky")) {
+    if (_timerSortie == 0 && _name.equals("Blinky")) {
       _released = true;
     } else {
       _released = false;
       // Réinitialiser les timers de sortie
-      if (_name.equals("Pinky")) _releaseTimer = 60;
-      else if (_name.equals("Inky")) _releaseTimer = 120;
-      else if (_name.equals("Clyde")) _releaseTimer = 180;
+      if (_name.equals("Pinky")) _timerSortie = 60;
+      else if (_name.equals("Inky")) _timerSortie = 120;
+      else if (_name.equals("Clyde")) _timerSortie = 180;
     }
   }
   
   // Vérifie la collision avec Pac-Man
   boolean collidesWith(Hero hero) {
     if (!_released || _eyes) return false; // Pas de collision si dans la cage ou en mode yeux
-    return dist(_position.x, _position.y, hero._position.x, hero._position.y) < (_size + hero._size) * 0.4;
+    return dist(_pos.x, _pos.y, hero._pos.x, hero._pos.y) < (_size + hero._size) * 0.4;
   }
   
   // DEBUG - Met à jour la trajectoire du fantôme (où il VA, pas d'où il vient)
@@ -503,7 +502,7 @@ class Ghost {
     if (!DEBUG_GHOST_PATH) return;
     
     // Effacer l'ancienne trajectoire
-    _pathPoints.clear();
+    _chemin.clear();
     
     // Si pas released, ne pas afficher de trajectoire
     if (!_released && !_eyes) return;
@@ -517,33 +516,33 @@ class Ghost {
       // Mode normal : cible déterminée par l'IA
       targetCell = getTargetCell(hero);
       if (targetCell == null) {
-        targetCell = new PVector(_cellX, _cellY);
+        targetCell = new PVector(_x, _y);
       }
     }
     
-    // Calculer le chemin complet avec pathfinding
-    ArrayList<PVector> path = calculatePath(_cellX, _cellY, (int)targetCell.x, (int)targetCell.y);
+    // calculer chemin complet
+    ArrayList<PVector> path = trouverChemin(_x, _y, (int)targetCell.x, (int)targetCell.y);
     
     // Convertir les cellules en positions pixels
     for (PVector cell : path) {
       PVector pixelPos = _board.getCellCenter((int)cell.x, (int)cell.y);
-      _pathPoints.add(pixelPos);
+      _chemin.add(pixelPos);
     }
   }
   
-  // Calcule le chemin du point A au point B en utilisant un algorithme de pathfinding simplifié
-  ArrayList<PVector> calculatePath(int startX, int startY, int endX, int endY) {
+  // Trouve le meilleur chemin entre deux points
+  ArrayList<PVector> trouverChemin(int startX, int startY, int endX, int endY) {
     ArrayList<PVector> path = new ArrayList<PVector>();
     
-    // Si hors limites, retourner chemin vide
-    if (endX < 0 || endX >= _board._nbCellsX || endY < 0 || endY >= _board._nbCellsY) {
+    // verifier si destination valide
+    if (endX < 0 || endX >= _board._nbX || endY < 0 || endY >= _board._nbY) {
       path.add(new PVector(startX, startY));
       return path;
     }
     
-    // Utiliser BFS (Breadth-First Search) pour trouver le chemin
+    // recherche du chemin
     ArrayList<PVector> queue = new ArrayList<PVector>();
-    boolean[][] visited = new boolean[_board._nbCellsX][_board._nbCellsY];
+    boolean[][] visited = new boolean[_board._nbX][_board._nbY];
     HashMap<String, PVector> parent = new HashMap<String, PVector>();
     
     queue.add(new PVector(startX, startY));
@@ -551,13 +550,13 @@ class Ghost {
     
     boolean found = false;
     PVector[] directions = {
-      new PVector(0, -1),  // Haut
-      new PVector(0, 1),   // Bas
-      new PVector(-1, 0),  // Gauche
-      new PVector(1, 0)    // Droite
+      new PVector(0, -1),  // haut
+      new PVector(0, 1),   // bas
+      new PVector(-1, 0),  // gauche
+      new PVector(1, 0)    // droite
     };
     
-    // BFS pour trouver le chemin le plus court
+    // chercher le chemin
     while (queue.size() > 0 && !found) {
       PVector current = queue.remove(0);
       int cx = (int)current.x;
@@ -575,8 +574,8 @@ class Ghost {
         int ny = cy + (int)dir.y;
         
         // Vérifier si valide et pas visité
-        if (nx >= 0 && nx < _board._nbCellsX && 
-            ny >= 0 && ny < _board._nbCellsY &&
+        if (nx >= 0 && nx < _board._nbX && 
+            ny >= 0 && ny < _board._nbY &&
             !visited[nx][ny] && !_board.isWall(nx, ny)) {
           
           // Gérer la cage : les fantômes normaux ne peuvent pas y entrer SAUF si c'est la destination
@@ -627,7 +626,7 @@ class Ghost {
   
   // DEBUG - Affiche la trajectoire du fantôme
   void drawPath() {
-    if (!DEBUG_GHOST_PATH || _pathPoints.size() < 2) return;
+    if (!DEBUG_GHOST_PATH || _chemin.size() < 2) return;
     
     pushStyle();
     noFill();
@@ -635,7 +634,7 @@ class Ghost {
     
     // Utiliser la couleur du fantôme avec transparence
     color pathColor;
-    if (_scared) {
+    if (_peur) {
       pathColor = COLOR_GHOST_SCARED;
     } else if (_eyes) {
       pathColor = color(255, 255, 255);
@@ -646,23 +645,23 @@ class Ghost {
     stroke(red(pathColor), green(pathColor), blue(pathColor), 150);
     
     // Dessiner les lignes entre les points
-    for (int i = 0; i < _pathPoints.size() - 1; i++) {
-      PVector p1 = _pathPoints.get(i);
-      PVector p2 = _pathPoints.get(i + 1);
+    for (int i = 0; i < _chemin.size() - 1; i++) {
+      PVector p1 = _chemin.get(i);
+      PVector p2 = _chemin.get(i + 1);
       line(p1.x, p1.y, p2.x, p2.y);
     }
     
     // Dessiner de petits cercles aux points clés (tous les 3 points)
     fill(red(pathColor), green(pathColor), blue(pathColor), 200);
     noStroke();
-    for (int i = 0; i < _pathPoints.size(); i += 3) {
-      PVector p = _pathPoints.get(i);
+    for (int i = 0; i < _chemin.size(); i += 3) {
+      PVector p = _chemin.get(i);
       ellipse(p.x, p.y, 5, 5);
     }
     
     // Dessiner la cible (dernier point) avec un X
-    if (_pathPoints.size() > 0) {
-      PVector target = _pathPoints.get(_pathPoints.size() - 1);
+    if (_chemin.size() > 0) {
+      PVector target = _chemin.get(_chemin.size() - 1);
       stroke(red(pathColor), green(pathColor), blue(pathColor), 255);
       strokeWeight(2);
       float crossSize = 8;
@@ -678,14 +677,14 @@ class Ghost {
     popStyle();
   }
   
-  // Affiche le fantôme
+  // affichage fantome
   void drawIt() {
-    // DEBUG - Afficher d'abord la trajectoire (sous le fantôme)
+    // trajectoire debug
     drawPath();
     
-    // Toujours afficher le fantôme (même dans la cage)
+    // dessin du fantome
     pushMatrix();
-    translate(_position.x, _position.y);
+    translate(_pos.x, _pos.y);
     
     if (_eyes) {
       // Mode yeux : juste des yeux blancs
@@ -701,9 +700,9 @@ class Ghost {
       ellipse(-_size * 0.2, 0, _size * 0.15, _size * 0.2);
       ellipse(_size * 0.2, 0, _size * 0.15, _size * 0.2);
       
-    } else if (_scared) {
+    } else if (_peur) {
       // Fantôme effrayé : bleu avec clignotement vers la fin
-      if (_scaredTimer < 100 && frameCount % 20 < 10) {
+      if (_timerPeur < 100 && frameCount % 20 < 10) {
         fill(255, 255, 255); // Blanc clignotant
       } else {
         fill(COLOR_GHOST_SCARED);
@@ -755,8 +754,11 @@ class Ghost {
   }
   
   // Getters
-  boolean isScared() { return _scared; }
+  boolean isScared() { return _peur; }
   boolean isReleased() { return _released; }
-  int getCellX() { return _cellX; }
-  int getCellY() { return _cellY; }
+  int getCellX() { return _x; }
+  int getCellY() { return _y; }
 }
+
+
+
