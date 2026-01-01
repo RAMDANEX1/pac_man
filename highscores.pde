@@ -1,8 +1,9 @@
-// meilleurs scores
+// sauvegarde et charge les meilleurs scores
+// le tableau d'honneur des champions
 class HighScores {
   String[] names;
   int[] scores;
-  int maxScores = 5;
+  int maxScores = 5;  // le top 5 seulement
   String filepath = "data/scores.txt";
   
   HighScores() {
@@ -71,14 +72,14 @@ class HighScores {
       scores[i] = scores[i-1];
     }
     
-    // Inserer le nouveau score
+    // Inserer le nouveau score de la personne
     names[pos] = name;
     scores[pos] = score;
     
     println("Score ajoute au top 5 position " + (pos+1) + ": " + name + " - " + score);
     save();
   }
-  
+  // affichage ddu  meilleur score 
   void display() {
     fill(255, 255, 0);
     textAlign(CENTER);

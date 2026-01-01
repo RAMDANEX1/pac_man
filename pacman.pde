@@ -1,29 +1,34 @@
+// variables globales du jeu
 Game game;
 Menu menu;
 boolean inMenu;
 
+// fonction de demarrage de processing
+// appellé une seule fois au lancement
 void setup() {
-  size(900, 950, P2D);
+  size(900, 950, P2D);  // taille fenetre
   println("=== DEMARRAGE PAC-MAN ===");
   
-  // menu au debut
+  // on commence par le menu
   menu = new Menu();
   inMenu = true;
   
-  // jeu cree apres choix JOUER
+  // le jeu sera cree quand on clique sur jouer sinon ya rien hehe 
   game = null;
   
-  frameRate(60);
+  frameRate(60);  // 60 fps ca suffit largement ( et c'est plus facile a gerer )
   println("=== MENU INITIALISÉ ===");
 }
 
+// boucle principale - 60 fois par seconde
+// le coeur du jeu qui bat sans arret
 void draw() {
   if (inMenu) {
     menu.update();
     menu.drawIt();
   } else {
     if (game != null) {
-      // Vérifier si on doit retourner au menu
+      // check si le joueur veut revenir au menu
       if (game.shouldReturnToMenu()) {
         inMenu = true;
         menu.reset();
@@ -37,18 +42,19 @@ void draw() {
   }
 }
 
+// gestion des touches du clavier
 void keyPressed() {
   if (inMenu) {
     // verif etat avant
-    boolean wasSelectingDifficulty = menu._selectingDifficulty;
+    boolean wasSelectingDifficulty = menu.selectingDifficulty;
     
     menu.handleKey(key);
     
     // si difficulte selectionnee
     if (key == '\n' || key == '\r') {
-      if (wasSelectingDifficulty && menu._selectingDifficulty) {
+      if (wasSelectingDifficulty && menu.selectingDifficulty) {
         // Démarrer le jeu avec la difficulté sélectionnée
-        int difficulty = menu._selectedDifficulty;
+        int difficulty = menu.selectedDifficulty;
         println("=== DÉMARRAGE DU JEU (Difficulté: " + difficulty + ") ===");
         game = new Game(difficulty);
         inMenu = false;
@@ -61,9 +67,9 @@ void keyPressed() {
       if (key == ESC) {
         game.togglePause();
         key = 0;
-      } else if (game._paused && (key == '\n' || key == '\r')) {
+      } else if (game.paused && (key == '\n' || key == '\r')) {
         // menu pause ENTREE
-        if (game._pauseMenuOption == 1) {
+        if (game.pauseMenuOption == 1) {
           // Option "MENU PRINCIPAL" sélectionnée
           inMenu = true;
           menu.reset();
@@ -80,3 +86,4 @@ void keyPressed() {
 
 void mousePressed() { // For future use
 }
+

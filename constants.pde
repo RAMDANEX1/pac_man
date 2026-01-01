@@ -1,4 +1,7 @@
-// dimensions
+// toutes les constantes du jeu
+// j'ai mis ca dans un fichier apart pour pas tout melanger
+
+// dimensions des cases et du plateau
 final int CELL_SIZE = 40;
 final int BOARD_WIDTH = 19;
 final int BOARD_HEIGHT = 21;
@@ -25,7 +28,7 @@ final float PACMAN_SPEED = 4.0;           // Vitesse de déplacement (pixels par
 final float MOUTH_ANGLE = 45;             // Angle d'ouverture de la bouche (degrés)
 final float MOUTH_SPEED = 0.15;           // Vitesse d'animation de la bouche
 
-// Fantômes
+// Fantômes (les valeurs j'ai du les tweaker plusieur fois)
 final int GHOST_COUNT = 4;                // Nombre de fantômes
 final float GHOST_SIZE = 28;              // Taille des fantômes
 final float GHOST_SPEED = 2.5;            // Vitesse normale des fantômes
@@ -50,7 +53,8 @@ final int DIFFICULTY_EASY = 0;
 final int DIFFICULTY_MEDIUM = 1;
 final int DIFFICULTY_HARD = 2;
 
-// Classe pour stocker les paramètres de difficulté
+// classe pour stocker les params de chaque difficulté
+// plus pratique que de mettre des conditions partout
 class DifficultySettings {
   int lives;
   float ghostSpeed;
@@ -112,6 +116,6 @@ final int BONUS_SPAWN_TIME = 600;         // Apparition bonus (10 secondes à 60
 final int BONUS_DURATION = 300;           // Durée bonus à l'écran
 
 // Debug
-final boolean DEBUG_GHOST_PATH = true;    // Afficher les trajectoires des fantômes
+final boolean DEBUG_GHOST_PATH = false;    // Afficher les trajectoires des fantômes
 final int PATH_MAX_POINTS = 100;          // Nombre maximum de points dans la trajectoire
 final int PATH_UPDATE_INTERVAL = 3;       // Ajouter un point tous les X frames

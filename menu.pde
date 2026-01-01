@@ -1,46 +1,48 @@
-// menu principal
+// menu principal du jeu
+// avec des animations pour rendre ca plus vivant
 class Menu {
-  int _selectedOption;
-  boolean _animatePacman;
-  float _pacmanX;
-  int _animationFrame;
+  int selectedOption;
+  boolean animatePacman;
+  float pacmanX;
+  int animationFrame;
   
   // Options du menu
-  String[] _menuOptions = {"JOUER", "INSTRUCTIONS", "SCORES", "QUITTER"};
+  String[] menuOptions = {"JOUER", "INSTRUCTIONS", "SCORES", "QUITTER"};
   
   // État des instructions
-  boolean _showingInstructions;
-  boolean _showingScores;
-  HighScores _highScores;
+  boolean showingInstructions;
+  boolean showingScores;
+  HighScores highScores;
   
   // État de sélection de difficulté
-  boolean _selectingDifficulty;
-  int _selectedDifficulty;       // 0=EASY, 1=MEDIUM, 2=HARD
-  String[] _difficultyOptions = {"NIVEAU CHÈVRE", "MOYEN", "DIFFICILE"};
+  boolean selectingDifficulty;
+  int selectedDifficulty;       // 0=EASY, 1=MEDIUM, 2=HARD
+  String[] difficultyOptions = {"NIVEAU CHÈVRE", "MOYEN", "DIFFICILE"};
   
   // Constructeur
   Menu() {
-    _selectedOption = 0;
-    _animatePacman = true;
-    _pacmanX = -50;
-    _animationFrame = 0;
-    _showingInstructions = false;
-    _showingScores = false;
-    _selectingDifficulty = false;
-    _selectedDifficulty = 1; // MEDIUM par défaut
-    _highScores = new HighScores();
+    selectedOption = 0;
+    animatePacman = true;
+    pacmanX = -50;
+    animationFrame = 0;
+    showingInstructions = false;
+    showingScores = false;
+    selectingDifficulty = false;
+    selectedDifficulty = 1; // MEDIUM par défaut
+    highScores = new HighScores();
   }
   
-  // maj menu
+  // anime le pacman qui bouge en fond
+  // il a pas le droit de se reposer meme dans le menu
   void update() {
     // animation pacman
-    if (_animatePacman) {
-      _pacmanX += 3;
-      _animationFrame++;
+    if (animatePacman) {
+      pacmanX += 3;
+      animationFrame++;
       
       // Réinitialiser l'animation
-      if (_pacmanX > width + 100) {
-        _pacmanX = -50;
+      if (pacmanX > width + 100) {
+        pacmanX = -50;
       }
     }
   }
@@ -49,11 +51,11 @@ class Menu {
   void drawIt() {
     background(0);
     
-    if (_showingInstructions) {
+    if (showingInstructions) {
       drawInstructions();
-    } else if (_showingScores) {
-      _highScores.display();
-    } else if (_selectingDifficulty) {
+    } else if (showingScores) {
+      highScores.display();
+    } else if (selectingDifficulty) {
       drawDifficultySelection();
     } else {
       drawMainMenu();
@@ -80,11 +82,11 @@ class Menu {
     int startY = 400;
     int spacing = 80;
     
-    for (int i = 0; i < _menuOptions.length; i++) {
+    for (int i = 0; i < menuOptions.length; i++) {
       int y = startY + i * spacing;
       
       // Highlight de l'option sélectionnée
-      if (i == _selectedOption) {
+      if (i == selectedOption) {
         // Petit rectangle simple
         fill(255, 255, 0, 40);
         rectMode(CENTER);
@@ -101,7 +103,7 @@ class Menu {
         textSize(32);
       }
       
-      text(_menuOptions[i], width/2, y);
+      text(menuOptions[i], width/2, y);
     }
     
     // Instructions en bas
@@ -110,7 +112,8 @@ class Menu {
     text("↑↓ : Naviguer  |  ENTRÉE : Sélectionner", width/2, height - 50);
   }
   
-  // Affiche les instructions
+  // affiche l'ecran d'aide
+  // pour ceux qui n'ont jamais joue a pacman (ca existe ?)
   void drawInstructions() {
     // Titre
     fill(255, 255, 0);
@@ -201,7 +204,7 @@ class Menu {
     int startY = 300;
     int spacing = 100;
     
-    for (int i = 0; i < _difficultyOptions.length; i++) {
+    for (int i = 0; i < difficultyOptions.length; i++) {
       int y = startY + i * spacing;
       
       // Couleur selon la difficulté
@@ -211,7 +214,7 @@ class Menu {
       else optionColor = color(255, 0, 0);             // Rouge pour DIFFICILE
       
       // Highlight de l'option sélectionnée
-      if (i == _selectedDifficulty) {
+      if (i == selectedDifficulty) {
         // Rectangle de sélection
         float pulseSize = sin(frameCount * 0.1) * 10;
         fill(optionColor, 50);
@@ -229,15 +232,15 @@ class Menu {
         textSize(36);
       }
       
-      text(_difficultyOptions[i], width/2, y);
+      text(difficultyOptions[i], width/2, y);
     }
     
     // Description de la difficulté
     fill(255, 255, 255);
     textSize(20);
-    int descY = startY + _difficultyOptions.length * spacing + 50;
+    int descY = startY + difficultyOptions.length * spacing + 50;
     
-    switch(_selectedDifficulty) {
+    switch(selectedDifficulty) {
       case 0: // NIVEAU CHÈVRE
         text(" 5 vies | Fantômes très lents | Super-gomme infinie", width/2, descY);
         break;
@@ -375,35 +378,35 @@ class Menu {
   
   // Gestion des touches
   void handleKey(int k) {
-    if (_showingInstructions) {
+    if (showingInstructions) {
       // Dans les instructions, ESC pour retourner
       if (k == ESC) {
-        _showingInstructions = false;
+        showingInstructions = false;
         key = 0; // Empêcher la fermeture de l'application
       }
-    } else if (_showingScores) {
+    } else if (showingScores) {
       // Dans les scores, ESC pour retourner
       if (k == ESC) {
-        _showingScores = false;
+        showingScores = false;
         key = 0;
       }
-    } else if (_selectingDifficulty) {
+    } else if (selectingDifficulty) {
       // Navigation dans la sélection de difficulté
       if (k == CODED) {
         if (keyCode == UP) {
-          _selectedDifficulty--;
-          if (_selectedDifficulty < 0) {
-            _selectedDifficulty = _difficultyOptions.length - 1;
+          selectedDifficulty--;
+          if (selectedDifficulty < 0) {
+            selectedDifficulty = difficultyOptions.length - 1;
           }
         } else if (keyCode == DOWN) {
-          _selectedDifficulty++;
-          if (_selectedDifficulty >= _difficultyOptions.length) {
-            _selectedDifficulty = 0;
+          selectedDifficulty++;
+          if (selectedDifficulty >= difficultyOptions.length) {
+            selectedDifficulty = 0;
           }
         }
       } else if (k == ESC) {
         // Retour au menu principal
-        _selectingDifficulty = false;
+        selectingDifficulty = false;
         key = 0;
       }
       // ENTRÉE sera gérée dans pacman.pde
@@ -411,14 +414,14 @@ class Menu {
       // Dans le menu principal
       if (k == CODED) {
         if (keyCode == UP) {
-          _selectedOption--;
-          if (_selectedOption < 0) {
-            _selectedOption = _menuOptions.length - 1;
+          selectedOption--;
+          if (selectedOption < 0) {
+            selectedOption = menuOptions.length - 1;
           }
         } else if (keyCode == DOWN) {
-          _selectedOption++;
-          if (_selectedOption >= _menuOptions.length) {
-            _selectedOption = 0;
+          selectedOption++;
+          if (selectedOption >= menuOptions.length) {
+            selectedOption = 0;
           }
         }
       } else if (k == '\n' || k == '\r') {
@@ -430,15 +433,15 @@ class Menu {
   
   // Exécute l'option sélectionnée
   void executeOption() {
-    switch(_selectedOption) {
+    switch(selectedOption) {
       case 0: // JOUER
-        _selectingDifficulty = true;
+        selectingDifficulty = true;
         break;
       case 1: // INSTRUCTIONS
-        _showingInstructions = true;
+        showingInstructions = true;
         break;
       case 2: // SCORES
-        _showingScores = true;
+        showingScores = true;
         break;
       case 3: // QUITTER
         exit();
@@ -448,19 +451,20 @@ class Menu {
   
   // Réinitialise le menu
   void reset() {
-    _selectedOption = 0;
-    _showingInstructions = false;
-    _showingScores = false;
-    _selectingDifficulty = false;
-    _pacmanX = -50;
+    selectedOption = 0;
+    showingInstructions = false;
+    showingScores = false;
+    selectingDifficulty = false;
+    pacmanX = -50;
   }
   
   // Getters
   int getSelectedOption() {
-    return _selectedOption;
+    return selectedOption;
   }
   
   boolean isShowingInstructions() {
-    return _showingInstructions;
+    return showingInstructions;
   }
 }
+

@@ -1,100 +1,102 @@
-// bonus fruits
+// gestion des bonus/fruits qui apparaissent
+// j'ai du refaire cette partie plusieurs fois avant que ca marche
 class Bonus {
-  int _x, _y;
-  PVector _pos;
-  int _score;
-  String _type;
-  color _color;
-  boolean _active;
-  int _timer;
-  int _spawnTimer;
-  Board _board;
-  int _spawnCount;
-  boolean _hasSpawned;
+  int x, y;
+  PVector pos;
+  int score;
+  String type;
+  color couleur;
+  boolean active;
+  int timer;
+  int spawnTimer;
+  Board board;
+  int spawnCount;
+  boolean hasSpawned;
   
-  // Constructeur
-  Bonus(Board board, int cellX, int cellY, String type) {
-    _board = board;
-    _x = cellX;
-    _y = cellY;
-    _type = type;
-    _active = false;
-    _timer = BONUS_DURATION;
-    _spawnTimer = BONUS_SPAWN_TIME;
-    _spawnCount = 0;
-    _hasSpawned = false;
+  // constructeur
+  Bonus(Board b, int cellX, int cellY, String t) {
+    board = b;
+    x = cellX;
+    y = cellY;
+    type = t;
+    active = false;
+    timer = BONUS_DURATION;
+    spawnTimer = BONUS_SPAWN_TIME;
+    spawnCount = 0;
+    hasSpawned = false;
     
-    // Choisir une position aléatoire au début
+    // choisi position aleatoire au debut
     chooseRandomPosition();
     
-    // Choisir une position aléatoire au début
+    // choisi position aleatoire au debut
     chooseRandomPosition();
     
-    // Configuration selon le type
+    // config selon type
     switch(type) {
       case "cherry":
-        _score = 100;
-        _color = color(255, 0, 0);  // Rouge
+        score = 100;
+        couleur = color(255, 0, 0);  // rouge
         break;
       case "strawberry":
-        _score = 300;
-        _color = color(255, 105, 180);  // Rose
+        score = 300;
+        couleur = color(255, 105, 180);  // rose
         break;
       case "orange":
-        _score = 500;
-        _color = color(255, 165, 0);  // Orange
+        score = 500;
+        couleur = color(255, 165, 0);  // orange
         break;
       case "apple":
-        _score = 700;
-        _color = color(255, 0, 0);  // Rouge foncé
+        score = 700;
+        couleur = color(255, 0, 0);  // rouge fonce
         break;
       case "melon":
-        _score = 1000;
-        _color = color(0, 255, 0);  // Vert
+        score = 1000;
+        couleur = color(0, 255, 0);  // vert
         break;      case "diamond":
-        _score = 3000;
-        _color = color(0, 255, 255);  // Cyan brillant
+        score = 3000;
+        couleur = color(0, 255, 255);  // cyan brillant
         break;      default:
-        _score = 500;
-        _color = color(255, 255, 0);  // Jaune par défaut
+        score = 500;
+        couleur = color(255, 255, 0);  // jaune par defaut
         break;
     }
     
-    PVector cellCenter = _board.getCellCenter(_x, _y);
-    _pos = cellCenter.copy();
+    PVector cellCenter = board.getCellCenter(x, y);
+    pos = cellCenter.copy();
   }
   
-  // maj bonus
+  // verifie si un bonus doit apparaitre selon les gommes mangees
+  // plus tu manges plus tu as de cadeaux
   void update(int dotsEaten, int totalDots) {
-    if (!_active) {
+    if (!active) {
       // quel fruit apparait
       String newType = null;
       boolean shouldSpawn = false;
       
-      if (dotsEaten >= 70 && _spawnCount == 0) {
+      if (dotsEaten >= 70 && spawnCount == 0) {
         newType = "cherry";     // 70 gommes -> cerise (100 pts)
         shouldSpawn = true;
-        _spawnCount = 1;
-      } else if (dotsEaten >= 100 && _spawnCount == 1) {
+        spawnCount = 1;  // marche bien
+      } else if (dotsEaten >= 100 && spawnCount == 1) {
         newType = "strawberry"; // 100 gommes -> fraise (300 pts)
         shouldSpawn = true;
-        _spawnCount = 2;
-      } else if (dotsEaten >= 130 && _spawnCount == 2) {
+        spawnCount = 2;
+      } else if (dotsEaten >= 130 && spawnCount == 2) {
         newType = "orange";     // 130 gommes -> orange (500 pts)
         shouldSpawn = true;
-        _spawnCount = 3;
-      } else if (dotsEaten >= 160 && _spawnCount == 3) {
+        spawnCount = 3;
+      } else if (dotsEaten >= 160 && spawnCount == 3) {
         newType = "apple";      // 160 gommes -> pomme (700 pts)
         shouldSpawn = true;
-        _spawnCount = 4;
-      } else if (dotsEaten >= 190 && _spawnCount == 4) {
+        spawnCount = 4;
+      } else if (dotsEaten >= 190 && spawnCount == 4) {
         newType = "melon";      // 190 gommes -> melon (1000 pts)
         shouldSpawn = true;
-        _spawnCount = 5;
-      } else if (dotsEaten >= 220 && _spawnCount == 5) {
+        spawnCount = 5;
+      } else if (dotsEaten >= 220 && spawnCount == 5) {
         newType = "diamond";    // 220 gommes -> diamant (3000 pts)
         shouldSpawn = true;
-        _spawnCount = 6;
+        spawnCount = 6;
       }
       
       if (shouldSpawn && newType != null) {
@@ -103,102 +105,103 @@ class Bonus {
       }
     } else {
       // Décrémenter le timer
-      _timer--;
-      if (_timer <= 0) {
-        _active = false;
+      timer--;
+      if (timer <= 0) {
+        active = false;
         println("Bonus disparu!");
       }
     }
   }
   
-  // fait apparaitre
+  // fait apparaitre le bonus sur le plateau
+  // surprise pour pacman
   void spawn() {
     // nouvelle position random
     chooseRandomPosition();
     
-    _active = true;
-    _timer = BONUS_DURATION;
-    println("Bonus actif! Type: " + _type + ", Score: " + _score + ", Position: (" + _x + ", " + _y + ")");
+    active = true;
+    timer = BONUS_DURATION;
+    println("Bonus actif! Type: " + type + ", Score: " + score + ", Position: (" + x + ", " + y + ")");
   }
   
   // Change le type de fruit
   void changeType(String newType) {
-    _type = newType;
+    type = newType;
     
     // Mettre à jour le score et la couleur selon le nouveau type
     switch(newType) {
       case "cherry":
-        _score = 100;
-        _color = color(255, 0, 0);  // Rouge
+        score = 100;
+        couleur = color(255, 0, 0);  // Rouge
         break;
       case "strawberry":
-        _score = 300;
-        _color = color(255, 105, 180);  // Rose
+        score = 300;
+        couleur = color(255, 105, 180);  // Rose
         break;
       case "orange":
-        _score = 500;
-        _color = color(255, 165, 0);  // Orange
+        score = 500;
+        couleur = color(255, 165, 0);  // Orange
         break;
       case "apple":
-        _score = 700;
-        _color = color(255, 0, 0);  // Rouge foncé
+        score = 700;
+        couleur = color(255, 0, 0);  // Rouge foncé
         break;
       case "melon":
-        _score = 1000;
-        _color = color(0, 255, 0);  // Vert
+        score = 1000;
+        couleur = color(0, 255, 0);  // Vert
         break;
       case "diamond":
-        _score = 3000;
-        _color = color(0, 255, 255);  // Cyan brillant
+        score = 3000;
+        couleur = color(0, 255, 255);  // Cyan brillant
         break;
     }
     
-    println("Nouveau type de fruit: " + _type + " (" + _score + " points)");
+    println("Nouveau type de fruit: " + type + " (" + score + " points)");
   }
   
   // Collecte le bonus
   int collect() {
-    if (_active) {
-      _active = false;
-      return _score;
+    if (active) {
+      active = false;
+      return score;
     }
     return 0;
   }
   
   // Vérifie si le héros touche le bonus
   boolean collidesWith(Hero hero) {
-    if (!_active) return false;
+    if (!active) return false;
     
-    float distance = dist(_pos.x, _pos.y, hero._pos.x, hero._pos.y);
+    float distance = dist(pos.x, pos.y, hero.pos.x, hero.pos.y);
     return distance < 20;
   }
   
   // Affiche le bonus
   void drawIt() {
-    if (!_active) return;
+    if (!active) return;
     
     pushMatrix();
-    translate(_pos.x, _pos.y);
+    translate(pos.x, pos.y);
     
     // Effet de pulsation
     float pulse = 1 + 0.1 * sin(frameCount * 0.15);
     
     // Dessiner le fruit selon le type
-    if (_type.equals("cherry")) {
+    if (type.equals("cherry")) {
       drawCherry(pulse);
-    } else if (_type.equals("strawberry")) {
+    } else if (type.equals("strawberry")) {
       drawStrawberry(pulse);
-    } else if (_type.equals("orange")) {
+    } else if (type.equals("orange")) {
       drawOrange(pulse);
-    } else if (_type.equals("apple")) {
+    } else if (type.equals("apple")) {
       drawApple(pulse);
-    } else if (_type.equals("melon")) {
+    } else if (type.equals("melon")) {
       drawMelon(pulse);
-    } else if (_type.equals("diamond")) {
+    } else if (type.equals("diamond")) {
       drawDiamond(pulse);
     } else {
       // Bonus générique
-      fill(_color);
+      fill(couleur);
       noStroke();
       ellipse(0, 0, 20 * pulse, 20 * pulse);
     }
@@ -315,17 +318,17 @@ class Bonus {
   
   // Getters
   boolean isActive() {
-    return _active;
+    return active;
   }
   
   int getScore() {
-    return _score;
+    return score;
   }
   
   void reset() {
-    _active = false;
-    _spawnTimer = BONUS_SPAWN_TIME;
-    _timer = BONUS_DURATION;
+    active = false;
+    spawnTimer = BONUS_SPAWN_TIME;
+    timer = BONUS_DURATION;
   }
   
   // position aleatoire
@@ -333,9 +336,9 @@ class Bonus {
     // liste positions possibles
     ArrayList<PVector> validPositions = new ArrayList<PVector>();
     
-    for (int y = 1; y < _board._nbY - 1; y++) {
-      for (int x = 1; x < _board._nbX - 1; x++) {
-        TypeCell cell = _board.getCellType(x, y);
+    for (int y = 1; y < board.nbY - 1; y++) {
+      for (int x = 1; x < board.nbX - 1; x++) {
+        TypeCell cell = board.getCellType(x, y);
         // Accepter les espaces vides, gommes et super-gommes (pas les murs)
         if (cell == TypeCell.EMPTY || cell == TypeCell.DOT || cell == TypeCell.SUPER_DOT) {
           // Éviter la zone de la cage des fantômes (autour de x=11, y=10)
@@ -350,17 +353,17 @@ class Bonus {
     if (validPositions.size() > 0) {
       int randomIndex = (int)random(validPositions.size());
       PVector chosen = validPositions.get(randomIndex);
-      _x = (int)chosen.x;
-      _y = (int)chosen.y;
+      x = (int)chosen.x;
+      y = (int)chosen.y;
       
       // Mettre à jour la position pixel
-      PVector cellCenter = _board.getCellCenter(_x, _y);
-      _pos = cellCenter.copy();
+      PVector cellCenter = board.getCellCenter(x, y);
+      pos = cellCenter.copy();
     }
   }
   
   String getType() {
-    return _type;
+    return type;
   }
   
   // Dessine un diamant brillant
@@ -407,5 +410,7 @@ class Bonus {
     line(-10 * scale, 0, 10 * scale, 0);  // Horizontale
   }
 }
+
+
 
 
