@@ -1,5 +1,5 @@
-// les differents types de cases possibles
-// je suis pas sur si c'est la meilleure facon de faire mais ca fonctionne
+// les differents types de cases possibles dans la map
+// je suis pas sur si c'est la meilleure facon de faire mais ça fonctionne
 enum TypeCell 
 {
   EMPTY,
@@ -18,20 +18,8 @@ class Board
   int nbY;
   int taille;
   
-  // constructeur de base (pas utiliser finalement je crois)
-  Board(PVector position, int nbCellsX, int nbCellsY, int cellSize) {
-    pos = position;
-    nbX = nbCellsX;
-    nbY = nbCellsY;
-    taille = cellSize;
-    grille = new TypeCell[nbCellsY][nbCellsX];
-    
-    // init niveau en dur (pour tester au cas ou le fichier marche pas)
-    initializeHardcodedLevel();
-  }
   
-  // autre constructeur qui charge le niveau depuis un fichier txt
-  // c'est celui la qu'on utilise vraiment
+  // constructeur qui charge le niveau depuis un fichier txt
   Board(PVector position, int cellSize, String filename) {
     pos = position;
     taille = cellSize;
@@ -46,7 +34,7 @@ class Board
     String[] lines = loadStrings(filename);
     
     if (lines == null || lines.length == 0) {
-      println("ERREUR : fichier introuvable " + filename);
+      println("ERREUR : fichier introuvable try again " + filename);
       initializeHardcodedLevel();
       return;
     }
@@ -92,7 +80,7 @@ class Board
       }
     }
     
-    println("Niveau chargé : " + filename + " (" + nbX + "x" + nbY + ")");
+    println("Niveau chargé !congrats : " + filename + " (" + nbX + "x" + nbY + ")");
   }
   
   // cherche ou est le P dans le fichier pour savoir ou placer pacman
@@ -131,7 +119,7 @@ class Board
   }
   
   // niveau de secours si le fichier ne charge pas
-  // le plan B au cas ou
+  // le plan B au   /cas ou 
   void initializeHardcodedLevel() {
     // Créer un labyrinthe simple et original
     // W = mur, E = EMPTY, D = gomme, S = super-gomme

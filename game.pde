@@ -76,7 +76,7 @@ class Game
       bonus = new Bonus(board, 11, 12, "cherry");  // pos sous cage fantomes
     }
     
-    // compte les gommes
+    // compte les gommes du board
     if (board != null) {
       totalDots = board.countTotalDots();
     }
@@ -104,22 +104,22 @@ class Game
     int ghostBoxY = 10;
     int baseDelay = diffSettings.releaseDelay;
     
-    // blinky rouge
+    // initialisation de mr blinky rouge
     ghosts[0] = new Ghost(board, 11, 8, COLOR_GHOST_RED, "Blinky", 0);
     ghosts[0].speed = diffSettings.ghostSpeed;
     ghosts[0].vitesseNormale = diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
-    // Pinky (rose)
+    // initialisation de mr pinky rose
     ghosts[1] = new Ghost(board, 11, ghostBoxY, COLOR_GHOST_PINK, "Pinky", (int)(baseDelay * 0.5));
     ghosts[1].speed = diffSettings.ghostSpeed;
     ghosts[1].vitesseNormale = diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
-    // Inky (bleu)  
+    // initialisation de mr inky bleu  
     ghosts[2] = new Ghost(board, 10, ghostBoxY, COLOR_GHOST_CYAN, "Inky", baseDelay);
     ghosts[2].speed = diffSettings.ghostSpeed;
     ghosts[2].vitesseNormale = diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
     
-    // Clyde (orange)
+    // initialisation de mr clyde orange
     ghosts[3] = new Ghost(board, 12, ghostBoxY, COLOR_GHOST_ORANGE, "Clyde", (int)(baseDelay * 1.5));
     ghosts[3].speed = diffSettings.ghostSpeed;
     ghosts[3].vitesseNormale = diffSettings.ghostSpeed;  // Mémoriser la vitesse de difficulté
@@ -215,7 +215,7 @@ class Game
   }
   
   // regarde si pacman mange une gomme
-  // pacman a toujours faim apparemment
+  // pacman a toujours faim apparemment haha
   void checkDotEaten() {
     TypeCell currentCell = board.getCellType(hero.getCellX(), hero.getCellY());
     
@@ -268,12 +268,12 @@ class Game
     }
   }
   
-  // Perd une vie
+  // Perd une vie oh noooo
   void loseLife() {
     lives--;
     
     if (lives <= 0) {
-      gameOver = true;
+      gameOver = true; // la fin du jeu 
       gameOverTimer = 0;  // Réinitialiser le timer
     } else {
       // Réinitialiser les positions
@@ -316,7 +316,7 @@ class Game
     
     background(COLOR_BG);
     
-    // Afficher le titre du jeu
+    // Afficher le titre du jeu (PAC MAN)
     drawHeader();
     
     // Afficher le plateau
@@ -350,7 +350,7 @@ class Game
     }
   }
   
-  // titre jeu
+  // titre jeu  (dessination)
   void drawHeader() {
     fill(color(0, 100, 255));
     textAlign(CENTER);
@@ -764,7 +764,7 @@ class Game
         // Valider le nom
         if (playerName.length() > 0) {
           highScores.addScore(playerName, score);
-          println("Score sauvegarde: " + playerName + " - " + score);
+          println("Score sauvegardee: " + playerName + " - " + score);
           enteringName = false;
         }
       } else if (k == 8 || k == 127) {

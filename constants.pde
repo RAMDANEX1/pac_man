@@ -2,7 +2,7 @@
 // j'ai mis ca dans un fichier apart pour pas tout melanger
 
 // dimensions des cases et du plateau
-final int CELL_SIZE = 40;
+final int CELL_SIZE = 30;
 final int BOARD_WIDTH = 19;
 final int BOARD_HEIGHT = 21;
 final int BOARD_OFFSET_X = 50;
@@ -13,16 +13,16 @@ final int SCORE_DOT = 10;
 final int SCORE_SUPER_DOT = 50;     // Points pour une super-gomme
 final int SCORE_GHOST = 200;        // Points pour manger un fantôme
 
-// couleurs
-final color COLOR_WALL = color(33, 33, 222);
-final color COLOR_BG = color(0, 0, 0);
-final color COLOR_DOT = color(255, 184, 151);
-final color COLOR_SUPER_DOT = color(255, 165, 0);
-final color COLOR_EMPTY = color(0, 0, 0);
-final color COLOR_TEXT = color(255, 255, 255);
-final color COLOR_PACMAN = color(255, 255, 0);
+// couleurs 
+final color COLOR_WALL = color(33, 33, 222); /// bleu mur
+final color COLOR_BG = color(0, 0, 0);             // couleur fond noir
+final color COLOR_DOT = color(255, 184, 151);  // couleur gomme normale
+final color COLOR_SUPER_DOT = color(255, 165, 0);  // orange super-gomme
+final color COLOR_EMPTY = color(0, 0, 0);           // couleur case vide
+final color COLOR_TEXT = color(255, 255, 255);      // couleur texte blanche
+final color COLOR_PACMAN = color(255, 255, 0);   // jaune
 
-// pacman
+// pacman constantes
 final float PACMAN_SIZE = 30;             // Taille de Pac-Man
 final float PACMAN_SPEED = 4.0;           // Vitesse de déplacement (pixels par frame)
 final float MOUTH_ANGLE = 45;             // Angle d'ouverture de la bouche (degrés)
@@ -82,8 +82,8 @@ DifficultySettings getDifficultySettings(int difficulty) {
       return new DifficultySettings(
         3,      // 3 vies
         1.5,    // Fantômes très lents
-        2.0,    // Fantômes effrayés très lents
-        2.2,    // Clyde effrayé très lent
+        1.0,    // Fantômes effrayés très lents
+        1.0,    // Clyde effrayé très lent
         500,    // Super-gomme dure très longtemps
         240,    // Sortie de cage très lente
         3000    // Vie bonus à 3000 points
@@ -92,8 +92,8 @@ DifficultySettings getDifficultySettings(int difficulty) {
       return new DifficultySettings(
         2,      // 2 vies seulement
         4.2,    // Fantômes TRÈS rapides (plus que Pac-Man!)
-        4.5,    // Fantômes effrayés très rapides
-        4.8,    // Clyde effrayé extrêmement rapide
+        1.0,    // Fantômes effrayés très rapides
+        1.0,    // Clyde effrayé extrêmement rapide
         150,    // Super-gomme dure très peu de temps
         20,     // Sortie de cage quasi instantanée
         20000   // Vie bonus à 20000 points
@@ -102,8 +102,8 @@ DifficultySettings getDifficultySettings(int difficulty) {
       return new DifficultySettings(
         3,      // 3 vies
         3.3,    // Vitesse augmentée
-        3.6,    // Vitesse effrayé augmentée
-        3.9,    // Clyde effrayé rapide
+        1.0,    // Vitesse effrayé augmentée
+        1.0,    // Clyde effrayé rapide
         250,    // Durée réduite
         90,     // Sortie plus rapide
         10000   // Vie bonus à 10000 points
@@ -116,6 +116,6 @@ final int BONUS_SPAWN_TIME = 600;         // Apparition bonus (10 secondes à 60
 final int BONUS_DURATION = 300;           // Durée bonus à l'écran
 
 // Debug
-final boolean DEBUG_GHOST_PATH = false;    // Afficher les trajectoires des fantômes
+final boolean DEBUG_GHOST_PATH = true;    // Afficher les trajectoires des fantômes
 final int PATH_MAX_POINTS = 100;          // Nombre maximum de points dans la trajectoire
 final int PATH_UPDATE_INTERVAL = 3;       // Ajouter un point tous les X frames

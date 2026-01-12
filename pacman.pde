@@ -16,7 +16,7 @@ void setup() {
   // le jeu sera cree quand on clique sur jouer sinon ya rien hehe 
   game = null;
   
-  frameRate(60);  // 60 fps ca suffit largement ( et c'est plus facile a gerer )
+  frameRate(60);  // 60 fps ca suffit largement ( et c'est plus facile a gerer )(et c'est suffisant pour votre ecran)
   println("=== MENU INITIALISÉ ===");
 }
 
@@ -84,6 +84,6 @@ void keyPressed() {
   }
 }
 
-void mousePressed() { // For future use
+void mousePressed() { // pour utilisation future si besoin (on sait jamais)
 }
 

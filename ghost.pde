@@ -1,4 +1,4 @@
-// classe pour les fantomes (la partie intelligente  du projet)
+// classe pour les fantomes (la partie intelligente et la plus difficile à realiser  du projet pour gerer les logique des phantoms lo)
 // chaque fantome a son propre comportement
 class Ghost {
   PVector pos;
@@ -432,7 +432,7 @@ class Ghost {
     y = floor((pos.y - board.pos.y) / board.taille);
   }
   
-  // Téléportation entre les bords de la carte
+  // Téléportation entre les bords de la carte ( fonction bien realisé mais comme mon hero ne teleporte pas alors les phantoms aussi(c'est unne poursuite))
   void checkTeleportation() {
     // Téléportation horizontale (gauche <-> droite)
     if (x < 0) {
@@ -453,7 +453,7 @@ class Ghost {
     }
   }
   
-  // Active le mode effrayé (quand Pac-Man mange une super-gomme)
+  // Active le mode effrayé (quand Pac-Man mange une super-gomme les phantoms seront son plat)
   void scare(int duration, float scaredSpeed, float scaredSpeedClyde) {
     // Ne pas effrayer les fantômes en mode yeux ou non-released
     if (eyes || !released) return;
@@ -628,7 +628,7 @@ class Ghost {
     return path;
   }
   
-  // DEBUG - Affiche la trajectoire du fantôme
+  // DEBUG - Affiche la trajectoire du fantôme (la partie que j'ai aimé elle est controlé dans le fichier constant ( à activer ou desactiver) )
   void drawPath() {
     if (!DEBUG_GHOST_PATH || chemin.size() < 2) return;
     
@@ -765,6 +765,7 @@ class Ghost {
 }
 
 
-
+// par contre si pac man mange une supergomme et le phantom est dans sa cage il ne devient pas mode effrayé
+// (je pense que ça sert a rien seulement si tu veux les manger dans leur propre cage)
 
 

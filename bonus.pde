@@ -1,15 +1,15 @@
 // gestion des bonus/fruits qui apparaissent
 // j'ai du refaire cette partie plusieurs fois avant que ca marche
-class Bonus {
-  int x, y;
-  PVector pos;
-  int score;
-  String type;
-  color couleur;
-  boolean active;
-  int timer;
-  int spawnTimer;
-  Board board;
+class Bonus {             //
+  int x, y;               //
+  PVector pos;            //
+  int score;              //
+  String type;            //
+  color couleur;          //
+  boolean active;         //
+  int timer;              //
+  int spawnTimer;         //
+  Board board;            //
   int spawnCount;
   boolean hasSpawned;
   
@@ -25,13 +25,12 @@ class Bonus {
     spawnCount = 0;
     hasSpawned = false;
     
-    // choisi position aleatoire au debut
-    chooseRandomPosition();
+    
     
     // choisi position aleatoire au debut
     chooseRandomPosition();
     
-    // config selon type
+    // config selon type de fruit
     switch(type) {
       case "cherry":
         score = 100;
@@ -74,27 +73,27 @@ class Bonus {
       boolean shouldSpawn = false;
       
       if (dotsEaten >= 70 && spawnCount == 0) {
-        newType = "cherry";     // 70 gommes -> cerise (100 pts)
+        newType = "cherry";     // 70 gommes alors cerise (100 pts)
         shouldSpawn = true;
         spawnCount = 1;  // marche bien
       } else if (dotsEaten >= 100 && spawnCount == 1) {
-        newType = "strawberry"; // 100 gommes -> fraise (300 pts)
+        newType = "strawberry"; // 100 gommes / fraise (300 pts)
         shouldSpawn = true;
         spawnCount = 2;
       } else if (dotsEaten >= 130 && spawnCount == 2) {
-        newType = "orange";     // 130 gommes -> orange (500 pts)
+        newType = "orange";     // 130 gommes / orange (500 pts)
         shouldSpawn = true;
         spawnCount = 3;
       } else if (dotsEaten >= 160 && spawnCount == 3) {
-        newType = "apple";      // 160 gommes -> pomme (700 pts)
+        newType = "apple";      // 160 gommes  /pomme (700 pts)
         shouldSpawn = true;
         spawnCount = 4;
       } else if (dotsEaten >= 190 && spawnCount == 4) {
-        newType = "melon";      // 190 gommes -> melon (1000 pts)
+        newType = "melon";      // 190 gommes / melon (1000 pts)
         shouldSpawn = true;
         spawnCount = 5;
       } else if (dotsEaten >= 220 && spawnCount == 5) {
-        newType = "diamond";    // 220 gommes -> diamant (3000 pts)
+        newType = "diamond";    // 220 gommes / diamant (3000 pts)
         shouldSpawn = true;
         spawnCount = 6;
       }
@@ -331,7 +330,7 @@ class Bonus {
     timer = BONUS_DURATION;
   }
   
-  // position aleatoire
+  // position aleatoire des fruits
   void chooseRandomPosition() {
     // liste positions possibles
     ArrayList<PVector> validPositions = new ArrayList<PVector>();
@@ -366,7 +365,7 @@ class Bonus {
     return type;
   }
   
-  // Dessine un diamant brillant
+  // Dessine un diamant brillant laaaa on traite le meilleur fruit (coté score)
   void drawDiamond(float scale) {
     noStroke();
     

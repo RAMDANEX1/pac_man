@@ -315,7 +315,7 @@ class Menu {
   
   // Animation Pac-Man
   void drawAnimatedPacman() {
-    // Pac-Man fixe au centre
+    // Pac-Man fixe au centre no animation j'ai pensé la faire mais ça sert a rien 
     pushMatrix();
     translate(width/2, 280);
     
@@ -330,7 +330,7 @@ class Menu {
     
     popMatrix();
     
-    // Dessiner les 4 fantômes autour de Pac-Man
+    // Dessiner les 4 fantômes autour de Pac-Man 
     drawMenuGhost(width/2 - 200, 280, color(255, 0, 0));      // Blinky (rouge) à gauche
     drawMenuGhost(width/2 - 100, 280, color(255, 184, 255));  // Pinky (rose)
     drawMenuGhost(width/2 + 100, 280, color(0, 255, 255));    // Inky (cyan)
